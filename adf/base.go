@@ -1,7 +1,7 @@
 /*
 This package is designed to simplify adaptive signal processing tasks
 with golang (filtering, prediction, reconstruction, classification).
-For code optimisation, this library uses gonum/floats and gonum/mat for array operations.
+For code optimisation, this library uses gonum/floats and gonum/mat for slice operations.
 
 This package is created with reference to https://github.com/matousc89/padasip.
 */
@@ -24,25 +24,21 @@ func init() {
 
 // AdaptiveFilter is the basic AdaptiveFilter interface type.
 type AdaptiveFilter interface {
-	InitWeights(w interface{}, n int) error
+	initWeights(w interface{}, n int) error
 	Predict(x []float64) (y float64)
 	Adapt(d float64, x []float64)
 	Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error)
-	CheckFloatParam(p, low, high float64, name string) (float64, error)
-	CheckIntParam(p, low, high int, name string) (int, error)
-	SetMu(mu float64)
+	checkFloatParam(p, low, high float64, name string) (float64, error)
+	checkIntParam(p, low, high int, name string) (int, error)
+	SetStepSize(mu float64)
 	GetParams() (int, float64, []float64)
 }
 
-
 //PreTrainedRun use part of the data for few epochs of learning.
 //The arg `d` is desired values.
-//`x`: input matrix. rows are samples and columns are features.
-//`nTrain`: train to test ratio (float), typical value is 0.5
-//          (that means 50% of data is used for training)
-//`epochs`: number of training epochs (int), default value is 1.
-//          This number describes how many times the training will be repeated
-//          on dedicated part of data.
+//`x` is input matrix. rows are samples and columns are features.
+//`nTrain` is train to test ratio, typical value is 0.5. (that means 50% of data is used for training).
+//`epochs` is number of training epochs, typical value is 1. This number describes how many times the training will be repeated.
 func PreTrainedRun(af AdaptiveFilter, d []float64, x [][]float64, nTrain float64, epochs int) (y, e []float64, w [][]float64, err error) {
 	var nTrainI = int(float64(len(d)) * nTrain)
 	//train
@@ -60,25 +56,17 @@ func PreTrainedRun(af AdaptiveFilter, d []float64, x [][]float64, nTrain float64
 	return y, e, w, nil
 }
 
-//ExploreLearning tests what learning rate is the best.
-//
-//* `d` : desired value.
-//* `x` : input matrix.
-//* `muStart` : starting learning rate.
-//* `muEnd` : final learning rate.
-//* `steps` : how many learning rates should be tested between `muStart`
-//			  and `muEnd`.
-//* `nTrain` : train to test ratio , default value is 0.5.
-//			   (that means 50% of data is used for training)
-//* `epochs` : number of training epochs , default value is 1.
-//			   This number describes how many times the training will be repeated
-//			   on dedicated part of data.
-//* `criteria` : how should be measured the mean error,
-//				 default value is "MSE".
-//* `target_w` : target weights, default value is False.
-//				 If False, the mean error is estimated from prediction error.
-//				 If an array is provided, the error between weights and `target_w`
-//				 is used.
+//ExploreLearning searches the `mu` with the smallest error value from the input matrix `x` and desired values `d`.
+//The arg `d` is desired value.
+//`x` is input matrix.
+//`muStart` is starting learning rate.
+//`muEnd` is final learning rate.
+//`steps` : how many learning rates should be tested between `muStart` and `muEnd`.
+//`nTrain` is train to test ratio, typical value is 0.5. (that means 50% of data is used for training)
+//`epochs` is number of training epochs, typical value is 1. This number describes how many times the training will be repeated.
+//`criteria` is how should be measured the mean error. Available values are "MSE", "MAE" and "RMSE".
+//`target_w` is target weights. If the slice is nil, the mean error is estimated from prediction error.
+// If an slice is provided, the error between weights and `target_w` is used.
 func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muEnd float64, steps int,
 	nTrain float64, epochs int, criteria string, targetW []float64) ([]float64, []float64, error) {
 	mus := misc.LinSpace(muStart, muEnd, steps)
@@ -86,11 +74,11 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	zeros := make([]float64, int(float64(len(x))*nTrain))
 	for i, mu := range mus {
 		//init
-		err := af.InitWeights("zeros", len(x[0]))
+		err := af.initWeights("zeros", len(x[0]))
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to init weights at InitWights()")
 		}
-		af.SetMu(mu)
+		af.SetStepSize(mu)
 		//run
 		_, e, _, err := PreTrainedRun(af, d, x, nTrain, epochs)
 		if err != nil {
@@ -105,12 +93,15 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	return es, mus, nil
 }
 
-func (af *filtBase) GetParams() (int, float64, []float64) {
-	return af.n, af.mu, af.w.RawRowView(0)
+//Must checks whether err is nil or not. If err in not nil, this func occurs panic.
+func Must(af AdaptiveFilter, err error) AdaptiveFilter {
+	if err != nil {
+		panic(err)
+	}
+	return af
 }
 
-
-//filtBase is base struct for adaptive filter structs.
+//FiltBase is base struct for adaptive filter structs.
 //It puts together some functions used by all adaptive filters.
 type filtBase struct {
 	w  *mat.Dense
@@ -118,36 +109,28 @@ type filtBase struct {
 	mu float64
 }
 
+//NewFiltBase is constructor of base adaptive filter only for develop.
 func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 	var err error
 	p := new(filtBase)
 	p.n = n
-	p.mu, err = p.CheckFloatParam(mu, 0, 1000, "mu")
+	p.mu, err = p.checkFloatParam(mu, 0, 1000, "mu")
 	if err != nil {
 		return nil, err
 	}
-	err = p.InitWeights(w, n)
+	err = p.initWeights(w, n)
 	if err != nil {
 		return nil, err
 	}
 	return p, nil
 }
 
-func Must(adf AdaptiveFilter, err error) AdaptiveFilter {
-	if err != nil {
-		panic(err)
-	}
-	return adf
-}
-
-//InitWeights initialises the adaptive weights of the filter.
-//
-//`w`: initial weights of filter. Possible values are
-//* "random": create random weights
-//* "zeros": create zero value weights
-//
-//`n`: size of filter (int) - number of filter coefficients.
-func (af *filtBase) InitWeights(w interface{}, n int) error {
+//initWeights initialises the adaptive weights of the filter.
+//The arg `w` is initial weights of filter.
+// Possible value "random":  create random weights with stddev 0.5 and mean is 0.
+// "zeros": create zero value weights.
+//`n` is size of filter. Note that it is often mistaken for the sample length.
+func (af *filtBase) initWeights(w interface{}, n int) error {
 	if n <= 0 {
 		n = af.n
 	}
@@ -176,18 +159,27 @@ func (af *filtBase) InitWeights(w interface{}, n int) error {
 	return nil
 }
 
-//Predict calculates the new output value `y` from input array `x`.
+//GetParams returns the parameters at the time this func is called.
+//parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
+func (af *filtBase) GetParams() (int, float64, []float64) {
+	return af.n, af.mu, af.w.RawRowView(0)
+}
+
+//Predict calculates the new output value `y` from input slice `x`.
 func (af *filtBase) Predict(x []float64) (y float64) {
 	y = floats.Dot(af.w.RawRowView(0), x)
 	return y
 }
 
-//Override to use this func.
+
+//Adapt is just a method to satisfy the interface.
+//It is used by overriding.
 func (af *filtBase) Adapt(d float64, x []float64) {
 	//TODO
 }
 
-//Override to use this func.
+//Run is just a method to satisfy the interface.
+//It is used by overriding.
 func (af *filtBase) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
 	//TODO
 	//measure the data and check if the dimension agree
@@ -211,9 +203,9 @@ func (af *filtBase) Run(d []float64, x [][]float64) ([]float64, []float64, [][]f
 	return y, e, ws, nil
 }
 
-//CheckFloatParam check if the value of the given parameter
+//checkFloatParam check if the value of the given parameter
 //is in the given range and a float.
-func (af *filtBase) CheckFloatParam(p, low, high float64, name string) (float64, error) {
+func (af *filtBase) checkFloatParam(p, low, high float64, name string) (float64, error) {
 	if low <= p && p <= high {
 		return p, nil
 	} else {
@@ -222,9 +214,9 @@ func (af *filtBase) CheckFloatParam(p, low, high float64, name string) (float64,
 	}
 }
 
-//CheckIntParam check if the value of the given parameter
+//checkIntParam check if the value of the given parameter
 //is in the given range and a int.
-func (af *filtBase) CheckIntParam(p, low, high int, name string) (int, error) {
+func (af *filtBase) checkIntParam(p, low, high int, name string) (int, error) {
 	if low <= p && p <= high {
 		return p, nil
 	} else {
@@ -233,7 +225,7 @@ func (af *filtBase) CheckIntParam(p, low, high int, name string) (int, error) {
 	}
 }
 
-//SetMu set a update param mu.
-func (af *filtBase) SetMu(mu float64) {
+//SetStepSize set a update step size mu.
+func (af *filtBase) SetStepSize(mu float64) {
 	af.mu = mu
 }

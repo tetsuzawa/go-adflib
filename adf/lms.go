@@ -17,11 +17,11 @@ func NewFiltLMS(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 	p := new(FiltLMS)
 	p.kind = "LMS filter"
 	p.n = n
-	p.mu, err = p.CheckFloatParam(mu, 0, 1000, "mu")
+	p.mu, err = p.checkFloatParam(mu, 0, 1000, "mu")
 	if err != nil {
 		return nil, err
 	}
-	err = p.InitWeights(w, n)
+	err = p.initWeights(w, n)
 	if err != nil {
 		return nil, err
 	}

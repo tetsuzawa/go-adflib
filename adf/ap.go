@@ -25,16 +25,16 @@ func NewFiltAP(n int, mu float64, order int, eps float64, w interface{}) (Adapti
 	p := new(FiltAP)
 	p.kind = "AP filter"
 	p.n = n
-	p.mu, err = p.CheckFloatParam(mu, 0, 1000, "mu")
+	p.mu, err = p.checkFloatParam(mu, 0, 1000, "mu")
 	if err != nil {
 		return nil, err
 	}
 	p.order = order
-	p.eps, err = p.CheckFloatParam(eps, 0, 1000, "eps")
+	p.eps, err = p.checkFloatParam(eps, 0, 1000, "eps")
 	if err != nil {
 		return nil, err
 	}
-	err = p.InitWeights(w, n)
+	err = p.initWeights(w, n)
 	if err != nil {
 		return nil, err
 	}

@@ -22,7 +22,7 @@ func NewFiltFBLMS(n int, mu float64, w interface{}) (FDADFInterface, error) {
 	p.n = n
 	p.mu, err = p.CheckFloatParam(mu, 0, 1000, "mu")
 	if err != nil {
-		return nil, errors.Wrap(err, "Parameter error at CheckFloatParam()")
+		return nil, errors.Wrap(err, "Parameter error at checkFloatParam()")
 	}
 	err = p.InitWeights(w, 2*n)
 	if err != nil {

@@ -137,7 +137,7 @@ func (af *FDAdaptiveFilter) GetParams() (int, float64, []float64) {
 	return af.n, af.mu, af.w.RawRowView(0)
 }
 
-//InitWeights initialises the adaptive weights of the filter.
+//initWeights initialises the adaptive weights of the filter.
 //
 //`w`: initial weights of filter. Possible values are
 //* "random": create random weights
@@ -193,7 +193,7 @@ func (af *FDAdaptiveFilter) Run(d [][]float64, x [][]float64) ([][]float64, [][]
 	return nil, nil, nil, nil
 }
 
-//CheckFloatParam check if the value of the given parameter
+//checkFloatParam check if the value of the given parameter
 //is in the given range and a float.
 func (af *FDAdaptiveFilter) CheckFloatParam(p, low, high float64, name string) (float64, error) {
 	if low <= p && p <= high {
@@ -204,7 +204,7 @@ func (af *FDAdaptiveFilter) CheckFloatParam(p, low, high float64, name string) (
 	}
 }
 
-//CheckIntParam check if the value of the given parameter
+//checkIntParam check if the value of the given parameter
 //is in the given range and a int.
 func (af *FDAdaptiveFilter) CheckIntParam(p, low, high int, name string) (int, error) {
 	if low <= p && p <= high {
@@ -215,7 +215,7 @@ func (af *FDAdaptiveFilter) CheckIntParam(p, low, high int, name string) (int, e
 	}
 }
 
-//SetMu set a update param mu.
+//SetStepSize set a update param mu.
 func (af *FDAdaptiveFilter) SetMu(mu float64) {
 	af.mu = mu
 }

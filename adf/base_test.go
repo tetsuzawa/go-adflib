@@ -77,13 +77,13 @@ func TestAdaptiveFilter_CheckFloatParam(t *testing.T) {
 			//if err != nil {
 			//	log.Fatalln(err)
 			//}
-			got, err := af.CheckFloatParam(tt.args.p, tt.args.low, tt.args.high, tt.args.name)
+			got, err := af.checkFloatParam(tt.args.p, tt.args.low, tt.args.high, tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CheckFloatParam() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("checkFloatParam() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("CheckFloatParam() got = %v, want %v", got, tt.want)
+				t.Errorf("checkFloatParam() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -148,13 +148,13 @@ func TestAdaptiveFilter_CheckIntParam(t *testing.T) {
 				n:  tt.fields.n,
 				mu: tt.fields.mu,
 			}
-			got, err := af.CheckIntParam(tt.args.p, tt.args.low, tt.args.high, tt.args.name)
+			got, err := af.checkIntParam(tt.args.p, tt.args.low, tt.args.high, tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CheckIntParam() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("checkIntParam() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("CheckIntParam() got = %v, want %v", got, tt.want)
+				t.Errorf("checkIntParam() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -304,8 +304,8 @@ func TestAdaptiveFilter_InitWeights(t *testing.T) {
 				n:  tt.fields.n,
 				mu: tt.fields.mu,
 			}
-			if err := af.InitWeights(tt.args.w, tt.args.n); (err != nil) != tt.wantErr {
-				t.Errorf("InitWeights() error = %v, wantErr %v", err, tt.wantErr)
+			if err := af.initWeights(tt.args.w, tt.args.n); (err != nil) != tt.wantErr {
+				t.Errorf("initWeights() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -18,15 +18,15 @@ func NewFiltNLMS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter,
 	p := new(FiltNLMS)
 	p.kind = "NLMS filter"
 	p.n = n
-	p.mu, err = p.CheckFloatParam(mu, 0, 2, "mu")
+	p.mu, err = p.checkFloatParam(mu, 0, 2, "mu")
 	if err != nil {
 		return nil, err
 	}
-	p.eps, err = p.CheckFloatParam(eps, 0, 1, "eps")
+	p.eps, err = p.checkFloatParam(eps, 0, 1, "eps")
 	if err != nil {
 		return nil, err
 	}
-	err = p.InitWeights(w, n)
+	err = p.initWeights(w, n)
 	if err != nil {
 		return nil, err
 	}

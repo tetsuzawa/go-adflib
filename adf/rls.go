@@ -20,15 +20,15 @@ func NewFiltRLS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter, 
 	p := new(FiltRLS)
 	p.kind = "RLS filter"
 	p.n = n
-	p.mu, err = p.CheckFloatParam(mu, 0, 1, "mu")
+	p.mu, err = p.checkFloatParam(mu, 0, 1, "mu")
 	if err != nil {
 		return nil, err
 	}
-	p.eps, err = p.CheckFloatParam(mu, 0, 1, "eps")
+	p.eps, err = p.checkFloatParam(mu, 0, 1, "eps")
 	if err != nil {
 		return nil, err
 	}
-	err = p.InitWeights(w, n)
+	err = p.initWeights(w, n)
 	if err != nil {
 		return nil, err
 	}
