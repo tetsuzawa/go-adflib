@@ -30,7 +30,7 @@ type AdaptiveFilter interface {
 	Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error)
 	checkFloatParam(p, low, high float64, name string) (float64, error)
 	checkIntParam(p, low, high int, name string) (int, error)
-	SetStepSize(mu float64)
+	setStepSize(mu float64)
 	GetParams() (int, float64, []float64)
 }
 
@@ -78,7 +78,7 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to init weights at InitWights()")
 		}
-		af.SetStepSize(mu)
+		af.setStepSize(mu)
 		//run
 		_, e, _, err := PreTrainedRun(af, d, x, nTrain, epochs)
 		if err != nil {
@@ -224,7 +224,7 @@ func (af *filtBase) checkIntParam(p, low, high int, name string) (int, error) {
 	}
 }
 
-//SetStepSize set a update step size mu.
-func (af *filtBase) SetStepSize(mu float64) {
+//setStepSize set a update step size mu.
+func (af *filtBase) setStepSize(mu float64) {
 	af.mu = mu
 }

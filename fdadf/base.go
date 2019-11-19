@@ -215,7 +215,7 @@ func (af *FDAdaptiveFilter) CheckIntParam(p, low, high int, name string) (int, e
 	}
 }
 
-//SetStepSize set a update param mu.
+//setStepSize set a update param mu.
 func (af *FDAdaptiveFilter) SetMu(mu float64) {
 	af.mu = mu
 }
