@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/tetsuzawa/go-research/go-adf/adf"
+	"github.com/tetsuzawa/go-adf/adf"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"

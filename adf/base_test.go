@@ -1,12 +1,12 @@
 package adf
 
 import (
+	"github.com/tetsuzawa/go-adf/misc"
 	"log"
 	"math/rand"
 	"reflect"
 	"testing"
 
-	"github.com/tetsuzawa/go-research/go-adf/misc"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -260,7 +260,7 @@ func TestExploreLearning(t *testing.T) {
 			//	n:  tt.fields.n,
 			//	mu: tt.fields.mu,
 			//}
-			af, err := newAdaptiveFilter(tt.fields.n, tt.fields.mu, tt.fields.w)
+			af, err := newFiltBase(tt.fields.n, tt.fields.mu, tt.fields.w)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -278,6 +278,7 @@ func TestExploreLearning(t *testing.T) {
 		})
 	}
 }
+
 
 func TestAdaptiveFilter_InitWeights(t *testing.T) {
 	type fields struct {
@@ -440,7 +441,7 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 	type fields struct {
 		n  int
 		mu float64
-		w  interface{}
+		w  *mat.Dense
 	}
 	tests := []struct {
 		name   string
@@ -454,7 +455,7 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 			fields: fields{
 				n:  8,
 				mu: 1.0,
-				w:  "zeros",
+				w:  mat.NewDense(1, 8, make([]float64, 8)),
 			},
 			want:  8,
 			want1: 1.0,
@@ -463,7 +464,7 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			af, _ := newAdaptiveFilter(tt.fields.n, tt.fields.mu, tt.fields.w)
+			af := filtBase{ tt.fields.n, tt.fields.mu, tt.fields.w}
 			got, got1, got2 := af.GetParams()
 			if got != tt.want {
 				t.Errorf("GetParams() got = %v, want %v", got, tt.want)

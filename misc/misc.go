@@ -2,9 +2,10 @@ package misc
 
 import (
 	"errors"
-	"github.com/gonum/floats"
 	"math"
 	"math/rand"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 func ElmAbs(fs []float64) []float64 {

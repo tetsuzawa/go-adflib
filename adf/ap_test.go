@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/gonum/floats"
-	"github.com/tetsuzawa/go-research/go-adf/misc"
+	"github.com/tetsuzawa/go-adf/misc"
 )
 
 /*

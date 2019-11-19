@@ -11,7 +11,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/tetsuzawa/go-research/go-adf/misc"
+	"github.com/tetsuzawa/go-adf/misc"
 	"gonum.org/v1/gonum/mat"
 )
 

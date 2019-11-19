@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tetsuzawa/go-research/go-adf/misc"
+	"github.com/tetsuzawa/go-adf/misc"
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
@@ -104,9 +104,9 @@ func Must(af AdaptiveFilter, err error) AdaptiveFilter {
 //FiltBase is base struct for adaptive filter structs.
 //It puts together some functions used by all adaptive filters.
 type filtBase struct {
-	w  *mat.Dense
 	n  int
 	mu float64
+	w  *mat.Dense
 }
 
 //NewFiltBase is constructor of base adaptive filter only for develop.
@@ -170,7 +170,6 @@ func (af *filtBase) Predict(x []float64) (y float64) {
 	y = floats.Dot(af.w.RawRowView(0), x)
 	return y
 }
-
 
 //Adapt is just a method to satisfy the interface.
 //It is used by overriding.
