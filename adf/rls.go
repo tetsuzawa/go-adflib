@@ -7,14 +7,18 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+//FiltRLS is base struct for RLS filter.
+//Use NewFiltRLS to make instance.
 type FiltRLS struct {
 	filtBase
-	kind     string
-	wHistory [][]float64
-	eps      float64
-	R        *mat.Dense
+	kind  string
+	wHist [][]float64
+	eps   float64
+	rMat  *mat.Dense
 }
 
+//NewFiltRLS is constructor of RLS filter.
+//This func initialize filter length `n`, update step size `mu`, small enough value `eps`, and filter weight `w`.
 func NewFiltRLS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter, error) {
 	var err error
 	p := new(FiltRLS)
@@ -36,10 +40,12 @@ func NewFiltRLS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter, 
 	for i := 0; i < n; i++ {
 		Rs[i*(n+1)] = 1 / eps
 	}
-	p.R = mat.NewDense(n, n, Rs)
+	p.rMat = mat.NewDense(n, n, Rs)
 	return p, nil
 }
 
+//Adapt calculates the error `e` between desired value `d` and estimated value `y`,
+//and update filter weights according to error `e`.
 func (af *FiltRLS) Adapt(d float64, x []float64) {
 	w := af.w.RawRowView(0)
 	y := floats.Dot(w, x)
@@ -49,6 +55,8 @@ func (af *FiltRLS) Adapt(d float64, x []float64) {
 	}
 }
 
+//Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
+//while updating filter weights according to error `e`.
 func (af *FiltRLS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
 	//measure the data and check if the dimension agree
 	N := len(x)
@@ -56,7 +64,10 @@ func (af *FiltRLS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]fl
 		return nil, nil, nil, errors.New("the length of slice d and x must agree")
 	}
 	af.n = len(x[0])
-	af.wHistory = make([][]float64, N)
+	af.wHist = make([][]float64, N)
+	for i := 0; i < N; i++ {
+		af.wHist[i] = make([]float64, af.n)
+	}
 
 	y := make([]float64, N)
 	e := make([]float64, N)
@@ -72,26 +83,26 @@ func (af *FiltRLS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]fl
 	dwT := mat.NewDense(af.n, 1, nil)
 	//adaptation loop
 	for i := 0; i < N; i++ {
-		af.wHistory[i] = w
+		copy(af.wHist[i], w)
 		y[i] = floats.Dot(w, x[i])
 		e[i] = d[i] - y[i]
 		xVec.SetRow(0, x[i])
-		aux1.Mul(af.R, xVec.T())
+		aux1.Mul(af.rMat, xVec.T())
 		aux2 = floats.Dot(mat.Col(nil, 0, aux1), mat.Row(nil, 0, xVec))
-		R1 = mat.DenseCopyOf(af.R)
+		R1 = mat.DenseCopyOf(af.rMat)
 		R1.Scale(aux2, R1)
 		//R1.Product(aux1.T(), xVec.T())
-		aux4.Mul(xVec, af.R)
+		aux4.Mul(xVec, af.rMat)
 		R2 = af.mu + mat.Dot(aux4.RowView(0), mat.DenseCopyOf(xVec.T()).ColView(0))
 		//for j:=0;j<af.n;j++{
-		//	floats.AddConst(af.R.RawRowView(j))
+		//	floats.AddConst(af.rMat.RawRowView(j))
 		//}
 		R1.Scale(1/R2, R1)
-		aux3.Sub(af.R, R1)
-		af.R.Scale(1/af.mu, aux3)
-		dwT.Mul(af.R, xVec.T())
+		aux3.Sub(af.rMat, R1)
+		af.rMat.Scale(1/af.mu, aux3)
+		dwT.Mul(af.rMat, xVec.T())
 		dwT.Scale(e[i], dwT)
 		floats.Add(w, mat.Col(nil, 0, dwT))
 	}
-	return y, e, af.wHistory, nil
+	return y, e, af.wHist, nil
 }
