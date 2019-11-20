@@ -34,7 +34,7 @@ func TestFiltNLMS_Run(t *testing.T) {
 	//	filtBase filtBase
 	//	kind           string
 	//	eps            float64
-	//	wHistory       [][]float64
+	//	wHist       [][]float64
 	//}
 	type args struct {
 		d []float64
@@ -67,7 +67,7 @@ func TestFiltNLMS_Run(t *testing.T) {
 			//	filtBase: tt.fields.filtBase,
 			//	kind:           tt.fields.kind,
 			//	eps:            tt.fields.eps,
-			//	wHistory:       tt.fields.wHistory,
+			//	wHist:       tt.fields.wHist,
 			//}
 			af := Must(NewFiltNLMS(L, 1.0, 1e-5, "random"))
 			got, got1, got2, err := af.Run(tt.args.d, tt.args.x)
@@ -133,7 +133,7 @@ func TestNewFiltNLMS(t *testing.T) {
 					mu: 1.0,
 				},
 				kind:     "LMS Filter",
-				wHistory: nil,
+				wHist: nil,
 			},
 			wantErr: false,
 		},

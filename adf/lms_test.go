@@ -19,7 +19,7 @@ func TestFiltLMS_Adapt(t *testing.T) {
 	type fields struct {
 		filtBase filtBase
 		kind           string
-		wHistory       [][]float64
+		wHist       [][]float64
 	}
 	type args struct {
 		d float64
@@ -37,7 +37,7 @@ func TestFiltLMS_Adapt(t *testing.T) {
 			af := &FiltLMS{
 				filtBase: tt.fields.filtBase,
 				kind:           tt.fields.kind,
-				wHistory:       tt.fields.wHistory,
+				wHist:       tt.fields.wHist,
 			}
 		})
 	}
@@ -81,7 +81,7 @@ func TestFiltLMS_Run(t *testing.T) {
 	//type fields struct {
 	//	filtBase filtBase
 	//	kind           string
-	//	wHistory       [][]float64
+	//	wHist       [][]float64
 	//}
 	type args struct {
 		d []float64
@@ -116,7 +116,7 @@ func TestFiltLMS_Run(t *testing.T) {
 			//af := &FiltLMS{
 			//	filtBase: tt.fields.filtBase,
 			//	kind:           tt.fields.kind,
-			//	wHistory:       tt.fields.wHistory,
+			//	wHist:       tt.fields.wHist,
 			//}
 			af := Must(NewFiltLMS(L, 0.1, "random"))
 			y, e, wHist, err := af.Run(tt.args.d, tt.args.x)

@@ -17,7 +17,7 @@ func TestFiltAP_Adapt(t *testing.T) {
 		kind           string
 		order          int
 		eps            float64
-		wHistory       *mat.Dense
+		wHist       *mat.Dense
 		xMem           *mat.Dense
 		dMem           *mat.Dense
 		yMem           *mat.Dense
@@ -43,7 +43,7 @@ func TestFiltAP_Adapt(t *testing.T) {
 				kind:           tt.fields.kind,
 				order:          tt.fields.order,
 				eps:            tt.fields.eps,
-				wHistory:       tt.fields.wHistory,
+				wHist:       tt.fields.wHist,
 				xMem:           tt.fields.xMem,
 				dMem:           tt.fields.dMem,
 				yMem:           tt.fields.yMem,
@@ -81,7 +81,7 @@ func TestFiltAP_Run(t *testing.T) {
 	//	kind           string
 	//	order          int
 	//	eps            float64
-	//	wHistory       *mat.Dense
+	//	wHist       *mat.Dense
 	//	xMem           *mat.Dense
 	//	dMem           *mat.Dense
 	//	yMem           *mat.Dense
@@ -121,7 +121,7 @@ func TestFiltAP_Run(t *testing.T) {
 			//	kind:           tt.fields.kind,
 			//	order:          tt.fields.order,
 			//	eps:            tt.fields.eps,
-			//	wHistory:       tt.fields.wHistory,
+			//	wHist:       tt.fields.wHist,
 			//	xMem:           tt.fields.xMem,
 			//	dMem:           tt.fields.dMem,
 			//	yMem:           tt.fields.yMem,
