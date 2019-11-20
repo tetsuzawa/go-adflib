@@ -12,6 +12,7 @@ type FiltLMS struct {
 	wHistory [][]float64
 }
 
+//NewFiltBase is constructor of LMS filter.
 func NewFiltLMS(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 	var err error
 	p := new(FiltLMS)
@@ -28,6 +29,8 @@ func NewFiltLMS(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 	return p, nil
 }
 
+//Adapt calculates the error `e` between desired value `d` and estimated value `y`,
+//and update filter weights according to error `e`.
 func (af *FiltLMS) Adapt(d float64, x []float64) {
 	w := af.w.RawRowView(0)
 	y := floats.Dot(w, x)
@@ -37,6 +40,8 @@ func (af *FiltLMS) Adapt(d float64, x []float64) {
 	}
 }
 
+//Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
+//updating filter weights according to error `e`.
 func (af *FiltLMS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
 	//measure the data and check if the dimension agree
 	N := len(x)

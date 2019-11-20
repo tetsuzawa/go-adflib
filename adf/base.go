@@ -165,7 +165,7 @@ func (af *filtBase) GetParams() (int, float64, []float64) {
 	return af.n, af.mu, af.w.RawRowView(0)
 }
 
-//Predict calculates the new output value `y` from input slice `x`.
+//Predict calculates the new estimated value `y` from input slice `x`.
 func (af *filtBase) Predict(x []float64) (y float64) {
 	y = floats.Dot(af.w.RawRowView(0), x)
 	return y
