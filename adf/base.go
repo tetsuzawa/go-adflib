@@ -27,11 +27,11 @@ type AdaptiveFilter interface {
 	initWeights(w interface{}, n int) error
 	Predict(x []float64) (y float64)
 	Adapt(d float64, x []float64)
-	Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error)
+	Run(d []float64, x [][]float64) (y []float64, e []float64, wHist [][]float64, err error)
 	checkFloatParam(p, low, high float64, name string) (float64, error)
 	checkIntParam(p, low, high int, name string) (int, error)
 	setStepSize(mu float64)
-	GetParams() (int, float64, []float64)
+	GetParams() (n int, mu float64, w []float64)
 }
 
 //PreTrainedRun use part of the data for few epochs of learning.
@@ -191,15 +191,15 @@ func (af *filtBase) Run(d []float64, x [][]float64) ([]float64, []float64, [][]f
 	y := make([]float64, N)
 	e := make([]float64, N)
 	w := make([]float64, af.n)
-	ws := make([][]float64, N)
+	wHist := make([][]float64, N)
 	//adaptation loop
 	for i := 0; i < N; i++ {
 		w = af.w.RawRowView(0)
 		y[i] = floats.Dot(w, x[i])
 		e[i] = d[i] - y[i]
-		ws[i] = w
+		copy(wHist[i], w)
 	}
-	return y, e, ws, nil
+	return y, e, wHist, nil
 }
 
 //checkFloatParam check if the value of the given parameter
