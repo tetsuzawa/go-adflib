@@ -3,7 +3,7 @@ package adf
 import (
 	"errors"
 
-	"github.com/gonum/floats"
+	"gonum.org/v1/gonum/floats"
 )
 
 //FiltLMS is base struct for LMS filter.
