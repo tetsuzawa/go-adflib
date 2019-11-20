@@ -18,20 +18,25 @@ import (
 // FDAdaptiveFilter is the basic Frequency Domain Adaptive Filter interface type.
 type FDAdaptiveFilter interface {
 	initWeights(w interface{}, n int) error
+
 	//Predict calculates the new estimated value `y` from input slice `x`.
 	Predict(x []float64) (y []float64)
+
 	//Adapt calculates the error `e` between desired value `d` and estimated value `y`,
 	//and update filter weights according to error `e`.
 	Adapt(d []float64, x []float64)
+
 	//Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
 	//while updating filter weights according to error `e`.
 	Run(d [][]float64, x [][]float64) ([][]float64, [][]float64, [][]float64, error)
 	checkFloatParam(p, low, high float64, name string) (float64, error)
 	checkIntParam(p, low, high int, name string) (int, error)
 	setStepSize(mu float64)
+
 	//GetParams returns the parameters at the time this func is called.
 	//parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
 	GetParams() (int, float64, []float64)
+
 	//GetParams returns the name of FDADF.
 	GetKindName() (kind string)
 }
