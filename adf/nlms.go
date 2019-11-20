@@ -6,6 +6,8 @@ import (
 	"github.com/gonum/floats"
 )
 
+//FiltNLMS is base struct for NLMS filter.
+//Use NewFiltNLMS to make instance.
 type FiltNLMS struct {
 	filtBase
 	kind     string
@@ -13,6 +15,8 @@ type FiltNLMS struct {
 	wHistory [][]float64
 }
 
+//NewFiltLMS is constructor of LMS filter.
+//This func initialize filter length `n`, update step size `mu` and filter weight `w`.
 func NewFiltNLMS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter, error) {
 	var err error
 	p := new(FiltNLMS)
@@ -33,6 +37,8 @@ func NewFiltNLMS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter,
 	return p, nil
 }
 
+//Adapt calculates the error `e` between desired value `d` and estimated value `y`,
+//and update filter weights according to error `e`.
 func (af *FiltNLMS) Adapt(d float64, x []float64) {
 	w := af.w.RawRowView(0)
 	y := floats.Dot(w, x)
@@ -43,6 +49,8 @@ func (af *FiltNLMS) Adapt(d float64, x []float64) {
 	}
 }
 
+//Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
+//while updating filter weights according to error `e`.
 func (af *FiltNLMS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
 	//measure the data and check if the dimension agree
 	N := len(x)
@@ -51,13 +59,16 @@ func (af *FiltNLMS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]f
 	}
 	af.n = len(x[0])
 	af.wHistory = make([][]float64, N)
+	for i := 0; i < N; i++ {
+		af.wHistory[i] = make([]float64, af.n)
+	}
 
 	y := make([]float64, N)
 	e := make([]float64, N)
 	w := af.w.RawRowView(0)
 	//adaptation loop
 	for i := 0; i < N; i++ {
-		af.wHistory[i] = w
+		copy(af.wHistory[i], w)
 		y[i] = floats.Dot(w, x[i])
 		e[i] = d[i] - y[i]
 		nu := af.mu / (af.eps + floats.Dot(x[i], x[i]))

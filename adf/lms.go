@@ -14,7 +14,8 @@ type FiltLMS struct {
 	wHistory [][]float64
 }
 
-//NewFiltBase is constructor of LMS filter.
+//NewFiltLMS is constructor of LMS filter.
+//This func initialize filter length `n`, update step size `mu` and filter weight `w`.
 func NewFiltLMS(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 	var err error
 	p := new(FiltLMS)
@@ -43,7 +44,7 @@ func (af *FiltLMS) Adapt(d float64, x []float64) {
 }
 
 //Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
-//updating filter weights according to error `e`.
+//while updating filter weights according to error `e`.
 func (af *FiltLMS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
 	//measure the data and check if the dimension agree
 	N := len(x)
@@ -52,7 +53,7 @@ func (af *FiltLMS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]fl
 	}
 	af.n = len(x[0])
 	af.wHistory = make([][]float64, N)
-	for i:=0;i<N;i++{
+	for i := 0; i < N; i++ {
 		af.wHistory[i] = make([]float64, af.n)
 	}
 
