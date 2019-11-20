@@ -9,35 +9,44 @@ package adf
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
-
 	"github.com/pkg/errors"
 	"github.com/tetsuzawa/go-adf/misc"
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
-// AdaptiveFilter is the basic AdaptiveFilter interface type.
+// AdaptiveFilter is the basic Adaptive Filter interface type.
 type AdaptiveFilter interface {
 	initWeights(w interface{}, n int) error
+	//Predict calculates the new estimated value `y` from input slice `x`.
 	Predict(x []float64) (y float64)
+	//Adapt calculates the error `e` between desired value `d` and estimated value `y`,
+	//and update filter weights according to error `e`.
 	Adapt(d float64, x []float64)
+	//Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
+	//while updating filter weights according to error `e`.
 	Run(d []float64, x [][]float64) (y []float64, e []float64, wHist [][]float64, err error)
 	checkFloatParam(p, low, high float64, name string) (float64, error)
 	checkIntParam(p, low, high int, name string) (int, error)
 	setStepSize(mu float64)
+	//GetParams returns the parameters at the time this func is called.
+	//parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
 	GetParams() (n int, mu float64, w []float64)
+	//GetParams returns the name of ADF.
 	GetKindName() (kind string)
+}
+
+//Must checks whether err is nil or not. If err in not nil, this func causes panic.
+func Must(af AdaptiveFilter, err error) AdaptiveFilter {
+	if err != nil {
+		panic(err)
+	}
+	return af
 }
 
 //PreTrainedRun use part of the data for few epochs of learning.
 //The arg `d` is desired values.
-//`x` is input matrix. rows are samples and columns are features.
+//`x` is input matrix. columns are bunch of samples and rows are set of samples.
 //`nTrain` is train to test ratio, typical value is 0.5. (that means 50% of data is used for training).
 //`epochs` is number of training epochs, typical value is 1. This number describes how many times the training will be repeated.
 func PreTrainedRun(af AdaptiveFilter, d []float64, x [][]float64, nTrain float64, epochs int) (y, e []float64, w [][]float64, err error) {
@@ -94,24 +103,16 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	return es, mus, nil
 }
 
-//Must checks whether err is nil or not. If err in not nil, this func occurs panic.
-func Must(af AdaptiveFilter, err error) AdaptiveFilter {
-	if err != nil {
-		panic(err)
-	}
-	return af
-}
-
 //FiltBase is base struct for adaptive filter structs.
 //It puts together some functions used by all adaptive filters.
 type filtBase struct {
 	kind string
-	n  int
-	mu float64
-	w  *mat.Dense
+	n    int
+	mu   float64
+	w    *mat.Dense
 }
 
-//NewFiltBase is constructor of base adaptive filter only for develop.
+//NewFiltBase is constructor of base adaptive filter only for development.
 func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 	var err error
 	p := new(filtBase)
@@ -160,17 +161,6 @@ func (af *filtBase) initWeights(w interface{}, n int) error {
 		return errors.New(`args w must be "random" or "zeros" or []float64{...}`)
 	}
 	return nil
-}
-
-//GetParams returns the parameters at the time this func is called.
-//parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
-func (af *filtBase) GetParams() (int, float64, []float64) {
-	return af.n, af.mu, af.w.RawRowView(0)
-}
-
-//GetParams returns the kind name of ADF.
-func (af *filtBase) GetKindName() string {
-	return af.kind
 }
 
 //Predict calculates the new estimated value `y` from input slice `x`.
@@ -235,4 +225,15 @@ func (af *filtBase) checkIntParam(p, low, high int, name string) (int, error) {
 //setStepSize set a update step size mu.
 func (af *filtBase) setStepSize(mu float64) {
 	af.mu = mu
+}
+
+//GetParams returns the parameters at the time this func is called.
+//parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
+func (af *filtBase) GetParams() (int, float64, []float64) {
+	return af.n, af.mu, af.w.RawRowView(0)
+}
+
+//GetParams returns the name of ADF.
+func (af *filtBase) GetKindName() string {
+	return af.kind
 }
