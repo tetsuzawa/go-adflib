@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/tetsuzawa/go-research/go-adf/adf"
+	"github.com/tetsuzawa/go-adf/adf"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
@@ -101,9 +101,9 @@ func main() {
 	plotD.Color = color.RGBA{R: 87, G: 209, B: 201, A: 1}
 	plotY.Color = color.RGBA{R: 237, G: 84, B: 133, A: 1}
 	plotE.Color = color.RGBA{R: 255, G: 232, B: 105, A: 1}
-	//plotD.GlyphStyle.Color = color.RGBA{R: 87, G: 209, B: 201, A: 1}
-	//plotY.GlyphStyle.Color = color.RGBA{R: 237, G: 84, B: 133, A: 1}
-	//plotE.GlyphStyle.Color = color.RGBA{R: 255, G: 232, B: 105, A: 1}
+	//plotD.GlyphStyle.Color = color.RGBA{: 87, G: 209, B: 201, A: 1}
+	//plotY.GlyphStyle.Color = color.RGBA{: 237, G: 84, B: 133, A: 1}
+	//plotE.GlyphStyle.Color = color.RGBA{: 255, G: 232, B: 105, A: 1}
 
 	// \plot
 	p.Add(plotD)
@@ -124,13 +124,13 @@ func main() {
 		log.Fatalln(err)
 	}
 	fw, err := os.Create(name)
-	if err != nil{
+	if err != nil {
 		log.Fatalln(err)
 	}
 	defer fw.Close()
-	for i:=0; i<n; i++ {
+	for i := 0; i < n; i++ {
 		_, err = fw.Write([]byte(fmt.Sprintf("%f,%f,%f\n", d[i], y[i], e[i])))
-		if err != nil{
+		if err != nil {
 			log.Fatalln(err)
 		}
 	}

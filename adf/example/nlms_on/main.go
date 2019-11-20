@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/gonum/floats"
-	"github.com/tetsuzawa/go-research/go-adf/adf"
-	"github.com/tetsuzawa/go-research/go-adf/misc"
+	"github.com/tetsuzawa/go-adf/adf"
+	"github.com/tetsuzawa/go-adf/misc"
 	"log"
 	"math/rand"
 	"os"
@@ -113,7 +113,7 @@ func ExploreLearning_nlms() {
 	es, mus, err := adf.ExploreLearning(af, d, x, 0.00001, 2.0, 100, 0.5, 100, "MSE", nil)
 	checkError(err)
 	res := make(map[float64]float64, len(es))
-	for i:=0;i<len(es);i++{
+	for i := 0; i < len(es); i++ {
 		res[es[i]] = mus[i]
 	}
 	eMin := floats.Min(es)

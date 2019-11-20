@@ -2,16 +2,18 @@ package misc
 
 import (
 	"errors"
-	"github.com/gonum/floats"
 	"math"
 	"math/rand"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 func ElmAbs(fs []float64) []float64 {
+	fsAbs := make([]float64, len(fs))
 	for i, f := range fs {
-		fs[i] = math.Abs(f)
+		fsAbs[i] = math.Abs(f)
 	}
-	return fs
+	return fsAbs
 }
 
 func LogSE(x1, x2 []float64) ([]float64, error) {

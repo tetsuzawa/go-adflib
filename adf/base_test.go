@@ -1,12 +1,12 @@
 package adf
 
 import (
+	"github.com/tetsuzawa/go-adf/misc"
 	"log"
 	"math/rand"
 	"reflect"
 	"testing"
 
-	"github.com/tetsuzawa/go-research/go-adf/misc"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -77,13 +77,13 @@ func TestAdaptiveFilter_CheckFloatParam(t *testing.T) {
 			//if err != nil {
 			//	log.Fatalln(err)
 			//}
-			got, err := af.CheckFloatParam(tt.args.p, tt.args.low, tt.args.high, tt.args.name)
+			got, err := af.checkFloatParam(tt.args.p, tt.args.low, tt.args.high, tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CheckFloatParam() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("checkFloatParam() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("CheckFloatParam() got = %v, want %v", got, tt.want)
+				t.Errorf("checkFloatParam() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -148,13 +148,13 @@ func TestAdaptiveFilter_CheckIntParam(t *testing.T) {
 				n:  tt.fields.n,
 				mu: tt.fields.mu,
 			}
-			got, err := af.CheckIntParam(tt.args.p, tt.args.low, tt.args.high, tt.args.name)
+			got, err := af.checkIntParam(tt.args.p, tt.args.low, tt.args.high, tt.args.name)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CheckIntParam() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("checkIntParam() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("CheckIntParam() got = %v, want %v", got, tt.want)
+				t.Errorf("checkIntParam() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -260,7 +260,7 @@ func TestExploreLearning(t *testing.T) {
 			//	n:  tt.fields.n,
 			//	mu: tt.fields.mu,
 			//}
-			af, err := newAdaptiveFilter(tt.fields.n, tt.fields.mu, tt.fields.w)
+			af, err := newFiltBase(tt.fields.n, tt.fields.mu, tt.fields.w)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -304,8 +304,8 @@ func TestAdaptiveFilter_InitWeights(t *testing.T) {
 				n:  tt.fields.n,
 				mu: tt.fields.mu,
 			}
-			if err := af.InitWeights(tt.args.w, tt.args.n); (err != nil) != tt.wantErr {
-				t.Errorf("InitWeights() error = %v, wantErr %v", err, tt.wantErr)
+			if err := af.initWeights(tt.args.w, tt.args.n); (err != nil) != tt.wantErr {
+				t.Errorf("initWeights() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -438,9 +438,10 @@ func TestAdaptiveFilter_Run(t *testing.T) {
 
 func TestAdaptiveFilter_GetParams(t *testing.T) {
 	type fields struct {
-		n  int
-		mu float64
-		w  interface{}
+		kind string
+		n    int
+		mu   float64
+		w    *mat.Dense
 	}
 	tests := []struct {
 		name   string
@@ -452,9 +453,10 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 		{
 			name: "GetParams",
 			fields: fields{
-				n:  8,
-				mu: 1.0,
-				w:  "zeros",
+				kind: "Base Filter",
+				n:    8,
+				mu:   1.0,
+				w:    mat.NewDense(1, 8, make([]float64, 8)),
 			},
 			want:  8,
 			want1: 1.0,
@@ -463,7 +465,7 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			af, _ := newAdaptiveFilter(tt.fields.n, tt.fields.mu, tt.fields.w)
+			af := filtBase{tt.fields.kind, tt.fields.n, tt.fields.mu, tt.fields.w}
 			got, got1, got2 := af.GetParams()
 			if got != tt.want {
 				t.Errorf("GetParams() got = %v, want %v", got, tt.want)
@@ -473,6 +475,37 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got2, tt.want2) {
 				t.Errorf("GetParams() got2 = %v, want %v", got2, tt.want2)
+			}
+		})
+	}
+}
+
+func Test_filtBase_GetKindName(t *testing.T) {
+	type fields struct {
+		n  int
+		mu float64
+		w  interface{}
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "Base GetKindName",
+			fields: fields{
+				n:  8,
+				mu: 1.0,
+				w:  "zeros",
+			},
+			want: "Base filter",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			af, _ := newFiltBase(tt.fields.n, tt.fields.mu, tt.fields.w)
+			if got := af.GetKindName(); got != tt.want {
+				t.Errorf("GetKindName() = %v, want %v", got, tt.want)
 			}
 		})
 	}
