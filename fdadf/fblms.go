@@ -8,23 +8,27 @@ import (
 	"math/cmplx"
 )
 
+//FiltFBLMS is base struct for FBLMS filter
+//(Fast Block Least Mean Square filter).
+//Use NewFiltFBLMS to make instance.
 type FiltFBLMS struct {
-	FDAdaptiveFilter
-	kind     string
+	filtBase
 	wHistory [][]float64
 	xMem     *mat.Dense
 }
 
-func NewFiltFBLMS(n int, mu float64, w interface{}) (FDADFInterface, error) {
+//NewFiltFBLMS is constructor of FBLMS filter.
+//This func initialize filter length `n`, update step size `mu` and filter weight `w`.
+func NewFiltFBLMS(n int, mu float64, w interface{}) (FDAdaptiveFilter, error) {
 	var err error
 	p := new(FiltFBLMS)
 	p.kind = "FBLMS filter"
 	p.n = n
-	p.mu, err = p.CheckFloatParam(mu, 0, 1000, "mu")
+	p.mu, err = p.checkFloatParam(mu, 0, 1000, "mu")
 	if err != nil {
-		return nil, errors.Wrap(err, "Parameter error at CheckFloatParam()")
+		return nil, errors.Wrap(err, "Parameter error at checkFloatParam()")
 	}
-	err = p.InitWeights(w, 2*n)
+	err = p.initWeights(w, 2*n)
 	if err != nil {
 		return nil, err
 	}
@@ -32,6 +36,8 @@ func NewFiltFBLMS(n int, mu float64, w interface{}) (FDADFInterface, error) {
 	return p, nil
 }
 
+//Adapt calculates the error `e` between desired value `d` and estimated value `y`,
+//and update filter weights according to error `e`.
 func (af *FiltFBLMS) Adapt(d []float64, x []float64) {
 	zeros := make([]float64, af.n)
 	Y := make([]complex128, 2*af.n)
@@ -74,6 +80,7 @@ func (af *FiltFBLMS) Adapt(d []float64, x []float64) {
 	}
 }
 
+//Predict calculates the new output value `y` from input array `x`.
 func (af *FiltFBLMS) Predict(x []float64) (y []float64) {
 	zeros := make([]float64, af.n)
 	y = make([]float64, af.n)
@@ -90,7 +97,9 @@ func (af *FiltFBLMS) Predict(x []float64) (y []float64) {
 	return
 }
 
-//x: rows are samples sets, and columns are input values
+//Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
+//while updating filter weights according to error `e`.
+//The arg `x`: rows are samples sets, columns are input values.
 func (af *FiltFBLMS) Run(d [][]float64, x [][]float64) ([][]float64, [][]float64, [][]float64, error) {
 	//measure the data and check if the dimension agree
 	N := len(x)

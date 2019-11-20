@@ -6,8 +6,8 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/tetsuzawa/go-research/go-adf/fdadf"
-	"github.com/tetsuzawa/go-research/go-adf/misc"
+	"github.com/tetsuzawa/go-adf/fdadf"
+	"github.com/tetsuzawa/go-adf/misc"
 )
 
 func main() {

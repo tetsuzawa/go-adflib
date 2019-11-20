@@ -6,35 +6,38 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
+//FiltAP is base struct for AP filter.
+//Use NewFiltAP to make instance.
 type FiltAP struct {
 	filtBase
-	kind     string
-	order    int
-	eps      float64
-	wHistory *mat.Dense
-	xMem     *mat.Dense
-	dMem     *mat.Dense
-	yMem     *mat.Dense
-	eMem     *mat.Dense
-	epsIDE   *mat.Dense
-	ide      *mat.Dense
+	order  int
+	eps    float64
+	wHist  *mat.Dense
+	xMem   *mat.Dense
+	dMem   *mat.Dense
+	yMem   *mat.Dense
+	eMem   *mat.Dense
+	epsIDE *mat.Dense
+	ide    *mat.Dense
 }
 
+//NewFiltAP is constructor of AP filter.
+//This func initialize filter length `n`, update step size `mu`, projection order `order` and filter weight `w`.
 func NewFiltAP(n int, mu float64, order int, eps float64, w interface{}) (AdaptiveFilter, error) {
 	var err error
 	p := new(FiltAP)
 	p.kind = "AP filter"
 	p.n = n
-	p.mu, err = p.CheckFloatParam(mu, 0, 1000, "mu")
+	p.mu, err = p.checkFloatParam(mu, 0, 1000, "mu")
 	if err != nil {
 		return nil, err
 	}
 	p.order = order
-	p.eps, err = p.CheckFloatParam(eps, 0, 1000, "eps")
+	p.eps, err = p.checkFloatParam(eps, 0, 1000, "eps")
 	if err != nil {
 		return nil, err
 	}
-	err = p.InitWeights(w, n)
+	err = p.initWeights(w, n)
 	if err != nil {
 		return nil, err
 	}
@@ -54,13 +57,15 @@ func NewFiltAP(n int, mu float64, order int, eps float64, w interface{}) (Adapti
 		diaMat[i*(order+1)] = 1
 	}
 	p.ide = mat.NewDense(order, order, diaMat)
-	//p.wHistory = mat.NewDense(len(x), order, nil)
+	//p.wHist = mat.NewDense(len(x), order, nil)
 	p.yMem = mat.NewDense(1, order, nil)
 	p.eMem = mat.NewDense(1, order, nil)
 
 	return p, nil
 }
 
+//Adapt calculates the error `e` between desired value `d` and estimated value `y`,
+//and update filter weights according to error `e`.
 func (af *FiltAP) Adapt(d float64, x []float64) {
 	xr, _ := af.xMem.Dims()
 	xCol := make([]float64, xr)
@@ -78,7 +83,6 @@ func (af *FiltAP) Adapt(d float64, x []float64) {
 	af.dMem.Set(0, 0, d)
 
 	// estimate output and error
-	//wd := mat.NewDense(1, len(af.w), af.w)
 	af.yMem.Mul(af.w, af.xMem)
 	af.eMem.Sub(af.dMem, af.yMem)
 
@@ -99,18 +103,19 @@ func (af *FiltAP) Adapt(d float64, x []float64) {
 	af.w.Add(af.w, dw)
 }
 
-func (af *FiltAP) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
-	//TODO
+//Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
+//while updating filter weights according to error `e`.
+func (af *FiltAP) Run(d []float64, x [][]float64) (y []float64, e []float64, wHist [][]float64, err error) {
 	//measure the data and check if the dimension agree
 	N := len(x)
 	if len(d) != N {
 		return nil, nil, nil, errors.New("the length of slice d and x must agree")
 	}
 	af.n = len(x[0])
-	af.wHistory = mat.NewDense(N, af.n, nil)
+	af.wHist = mat.NewDense(N, af.n, nil)
 
-	y := make([]float64, N)
-	e := make([]float64, N)
+	y = make([]float64, N)
+	e = make([]float64, N)
 
 	xr, _ := af.xMem.Dims()
 	xCol := make([]float64, xr)
@@ -119,8 +124,8 @@ func (af *FiltAP) Run(d []float64, x [][]float64) ([]float64, []float64, [][]flo
 
 	//adaptation loop
 	for i := 0; i < N; i++ {
-		//af.wHistory[i] = af.w
-		af.wHistory.SetRow(i, af.w.RawRowView(0))
+		//af.wHist[i] = af.w
+		af.wHist.SetRow(i, af.w.RawRowView(0))
 
 		// create input matrix and target vector
 		// shift column
@@ -156,9 +161,10 @@ func (af *FiltAP) Run(d []float64, x [][]float64) ([]float64, []float64, [][]flo
 		dw.Scale(af.mu, dw)
 		af.w.Add(af.w, dw.T())
 	}
-	wHistory := make([][]float64, N)
+	wHist = make([][]float64, N)
 	for i := 0; i < N; i++ {
-		wHistory[i] = af.wHistory.RawRowView(i)
+		wHist[i] = make([]float64, af.n)
+		copy(wHist[i], af.wHist.RawRowView(i))
 	}
-	return y, e, wHistory, nil
+	return y, e, wHist, nil
 }

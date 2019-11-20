@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/tetsuzawa/go-research/go-adf/adf"
+	"github.com/tetsuzawa/go-adf/adf"
 	"log"
 	"math/rand"
 	"os"
