@@ -10,7 +10,6 @@ import (
 //Use NewFiltNLMS to make instance.
 type FiltNLMS struct {
 	filtBase
-	kind     string
 	eps      float64
 	wHistory [][]float64
 }

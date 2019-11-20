@@ -10,7 +10,6 @@ import (
 //Use NewFiltAP to make instance.
 type FiltAP struct {
 	filtBase
-	kind   string
 	order  int
 	eps    float64
 	wHist  *mat.Dense

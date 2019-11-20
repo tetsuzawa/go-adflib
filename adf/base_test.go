@@ -279,7 +279,6 @@ func TestExploreLearning(t *testing.T) {
 	}
 }
 
-
 func TestAdaptiveFilter_InitWeights(t *testing.T) {
 	type fields struct {
 		w  *mat.Dense
@@ -439,9 +438,10 @@ func TestAdaptiveFilter_Run(t *testing.T) {
 
 func TestAdaptiveFilter_GetParams(t *testing.T) {
 	type fields struct {
-		n  int
-		mu float64
-		w  *mat.Dense
+		kind string
+		n    int
+		mu   float64
+		w    *mat.Dense
 	}
 	tests := []struct {
 		name   string
@@ -453,9 +453,10 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 		{
 			name: "GetParams",
 			fields: fields{
-				n:  8,
-				mu: 1.0,
-				w:  mat.NewDense(1, 8, make([]float64, 8)),
+				kind: "Base Filter",
+				n:    8,
+				mu:   1.0,
+				w:    mat.NewDense(1, 8, make([]float64, 8)),
 			},
 			want:  8,
 			want1: 1.0,
@@ -464,7 +465,7 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			af := filtBase{ tt.fields.n, tt.fields.mu, tt.fields.w}
+			af := filtBase{tt.fields.kind, tt.fields.n, tt.fields.mu, tt.fields.w}
 			got, got1, got2 := af.GetParams()
 			if got != tt.want {
 				t.Errorf("GetParams() got = %v, want %v", got, tt.want)
@@ -474,6 +475,37 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got2, tt.want2) {
 				t.Errorf("GetParams() got2 = %v, want %v", got2, tt.want2)
+			}
+		})
+	}
+}
+
+func Test_filtBase_GetKindName(t *testing.T) {
+	type fields struct {
+		n  int
+		mu float64
+		w  interface{}
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "Base GetKindName",
+			fields: fields{
+				n:  8,
+				mu: 1.0,
+				w:  "zeros",
+			},
+			want: "Base filter",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			af, _ := newFiltBase(tt.fields.n, tt.fields.mu, tt.fields.w)
+			if got := af.GetKindName(); got != tt.want {
+				t.Errorf("GetKindName() = %v, want %v", got, tt.want)
 			}
 		})
 	}

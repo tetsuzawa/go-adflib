@@ -32,6 +32,7 @@ type AdaptiveFilter interface {
 	checkIntParam(p, low, high int, name string) (int, error)
 	setStepSize(mu float64)
 	GetParams() (n int, mu float64, w []float64)
+	GetKindName() (kind string)
 }
 
 //PreTrainedRun use part of the data for few epochs of learning.
@@ -104,6 +105,7 @@ func Must(af AdaptiveFilter, err error) AdaptiveFilter {
 //FiltBase is base struct for adaptive filter structs.
 //It puts together some functions used by all adaptive filters.
 type filtBase struct {
+	kind string
 	n  int
 	mu float64
 	w  *mat.Dense
@@ -113,6 +115,7 @@ type filtBase struct {
 func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 	var err error
 	p := new(filtBase)
+	p.kind = "Base filter"
 	p.n = n
 	p.mu, err = p.checkFloatParam(mu, 0, 1000, "mu")
 	if err != nil {
@@ -163,6 +166,11 @@ func (af *filtBase) initWeights(w interface{}, n int) error {
 //parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
 func (af *filtBase) GetParams() (int, float64, []float64) {
 	return af.n, af.mu, af.w.RawRowView(0)
+}
+
+//GetParams returns the kind name of ADF.
+func (af *filtBase) GetKindName() string {
+	return af.kind
 }
 
 //Predict calculates the new estimated value `y` from input slice `x`.

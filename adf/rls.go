@@ -11,7 +11,6 @@ import (
 //Use NewFiltRLS to make instance.
 type FiltRLS struct {
 	filtBase
-	kind  string
 	wHist [][]float64
 	eps   float64
 	rMat  *mat.Dense
