@@ -1,7 +1,7 @@
 package adf
 
 import (
-	"github.com/tetsuzawa/go-adf/misc"
+	"github.com/tetsuzawa/go-adflib/misc"
 	"log"
 	"math/rand"
 	"reflect"

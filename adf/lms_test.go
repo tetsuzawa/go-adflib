@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/tetsuzawa/go-adf/misc"
+	"gonum.org/v1/gonum/floats"
+	"github.com/tetsuzawa/go-adflib/misc"
 )
 
 func init() {
