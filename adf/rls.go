@@ -56,7 +56,7 @@ func (af *FiltRLS) Adapt(d float64, x []float64) {
 
 //Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
 //while updating filter weights according to error `e`.
-func (af *FiltRLS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
+func (af *FiltRLS) Run(d []float64, x [][]float64) (y []float64, e []float64, wHist [][]float64, err error) {
 	//measure the data and check if the dimension agree
 	N := len(x)
 	if len(d) != N {
@@ -68,8 +68,8 @@ func (af *FiltRLS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]fl
 		af.wHist[i] = make([]float64, af.n)
 	}
 
-	y := make([]float64, N)
-	e := make([]float64, N)
+	y = make([]float64, N)
+	e = make([]float64, N)
 	w := af.w.RawRowView(0)
 	R1 := mat.NewDense(af.n, af.n, nil)
 	var R2 float64
@@ -103,5 +103,6 @@ func (af *FiltRLS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]fl
 		dwT.Scale(e[i], dwT)
 		floats.Add(w, mat.Col(nil, 0, dwT))
 	}
+	wHist = af.wHist
 	return y, e, af.wHist, nil
 }

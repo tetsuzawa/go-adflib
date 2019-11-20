@@ -50,7 +50,7 @@ func (af *FiltNLMS) Adapt(d float64, x []float64) {
 
 //Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
 //while updating filter weights according to error `e`.
-func (af *FiltNLMS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
+func (af *FiltNLMS) Run(d []float64, x [][]float64) (y []float64, e []float64, wHist [][]float64, err error) {
 	//measure the data and check if the dimension agree
 	N := len(x)
 	if len(d) != N {
@@ -62,8 +62,8 @@ func (af *FiltNLMS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]f
 		af.wHistory[i] = make([]float64, af.n)
 	}
 
-	y := make([]float64, N)
-	e := make([]float64, N)
+	y = make([]float64, N)
+	e = make([]float64, N)
 	w := af.w.RawRowView(0)
 	//adaptation loop
 	for i := 0; i < N; i++ {
@@ -75,5 +75,6 @@ func (af *FiltNLMS) Run(d []float64, x [][]float64) ([]float64, []float64, [][]f
 			w[j] = nu * e[i] * x[i][j]
 		}
 	}
+	wHist = af.wHistory
 	return y, e, af.wHistory, nil
 }

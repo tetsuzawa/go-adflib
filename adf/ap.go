@@ -103,10 +103,9 @@ func (af *FiltAP) Adapt(d float64, x []float64) {
 	af.w.Add(af.w, dw)
 }
 
-
 //Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
 //while updating filter weights according to error `e`.
-func (af *FiltAP) Run(d []float64, x [][]float64) ([]float64, []float64, [][]float64, error) {
+func (af *FiltAP) Run(d []float64, x [][]float64) (y []float64, e []float64, wHist [][]float64, err error) {
 	//measure the data and check if the dimension agree
 	N := len(x)
 	if len(d) != N {
@@ -115,8 +114,8 @@ func (af *FiltAP) Run(d []float64, x [][]float64) ([]float64, []float64, [][]flo
 	af.n = len(x[0])
 	af.wHist = mat.NewDense(N, af.n, nil)
 
-	y := make([]float64, N)
-	e := make([]float64, N)
+	y = make([]float64, N)
+	e = make([]float64, N)
 
 	xr, _ := af.xMem.Dims()
 	xCol := make([]float64, xr)
@@ -162,7 +161,7 @@ func (af *FiltAP) Run(d []float64, x [][]float64) ([]float64, []float64, [][]flo
 		dw.Scale(af.mu, dw)
 		af.w.Add(af.w, dw.T())
 	}
-	wHist := make([][]float64, N)
+	wHist = make([][]float64, N)
 	for i := 0; i < N; i++ {
 		wHist[i] = make([]float64, af.n)
 		copy(wHist[i], af.wHist.RawRowView(i))

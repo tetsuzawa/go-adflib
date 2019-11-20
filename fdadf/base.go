@@ -226,11 +226,11 @@ func (af *filtBase) setStepSize(mu float64) {
 
 //GetParams returns the parameters at the time this func is called.
 //parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
-func (af *filtBase) GetParams() (int, float64, []float64) {
+func (af *filtBase) GetParams() (n int, mu float64, w []float64) {
 	return af.n, af.mu, af.w.RawRowView(0)
 }
 
 //GetParams returns the kind name of ADF.
-func (af *filtBase) GetKindName() string {
+func (af *filtBase) GetKindName() (kind string) {
 	return af.kind
 }
