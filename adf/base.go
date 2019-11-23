@@ -30,7 +30,9 @@ type AdaptiveFilter interface {
 	Run(d []float64, x [][]float64) (y []float64, e []float64, wHist [][]float64, err error)
 	checkFloatParam(p, low, high float64, name string) (float64, error)
 	checkIntParam(p, low, high int, name string) (int, error)
-	setStepSize(mu float64)
+
+	//SetStepSize sets the step size of adaptive filter.
+	SetStepSize(mu float64)
 
 	//GetParams returns the parameters at the time this func is called.
 	//parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
