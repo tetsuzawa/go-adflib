@@ -94,7 +94,7 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to init weights at InitWights()")
 		}
-		af.setStepSize(mu)
+		af.SetStepSize(mu)
 		//run
 		_, e, _, err := PreTrainedRun(af, d, x, nTrain, epochs)
 		if err != nil {
