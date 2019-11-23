@@ -228,7 +228,7 @@ func (af *filtBase) checkIntParam(p, low, high int, name string) (int, error) {
 	}
 }
 
-//setStepSize set a update step size mu.
+//SetStepSize set a update step size mu.
 func (af *filtBase) SetStepSize(mu float64) {
 	af.mu = mu
 }
