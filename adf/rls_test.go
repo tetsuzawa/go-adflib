@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"gonum.org/v1/gonum/floats"
 	"github.com/tetsuzawa/go-adflib/misc"
+	"gonum.org/v1/gonum/floats"
 )
 
 func TestFiltRLS_Run(t *testing.T) {
@@ -18,6 +18,9 @@ func TestFiltRLS_Run(t *testing.T) {
 	L := 4
 	//input value
 	var x = make([][]float64, n)
+	for i := 0; i < n; i++ {
+		x[i] = make([]float64, L)
+	}
 	//noise
 	var v = make([]float64, n)
 	//desired value
@@ -26,7 +29,7 @@ func TestFiltRLS_Run(t *testing.T) {
 	for i := 0; i < n; i++ {
 		xRow = misc.Unset(xRow, 0)
 		xRow = append(xRow, rand.NormFloat64())
-		x[i] = append([]float64{}, xRow...)
+		copy(x[i], xRow)
 		v[i] = rand.NormFloat64() * 0.1
 		d[i] = x[i][0]
 	}
