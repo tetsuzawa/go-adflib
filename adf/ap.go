@@ -2,7 +2,6 @@ package adf
 
 import (
 	"errors"
-
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -12,7 +11,7 @@ type FiltAP struct {
 	filtBase
 	order  int
 	eps    float64
-	wHist  *mat.Dense
+	wHist  [][]float64
 	xMem   *mat.Dense
 	dMem   *mat.Dense
 	yMem   *mat.Dense
@@ -57,8 +56,8 @@ func NewFiltAP(n int, mu float64, order int, eps float64, w interface{}) (Adapti
 		diaMat[i*(order+1)] = 1
 	}
 	p.ide = mat.NewDense(order, order, diaMat)
-	//p.wHist = mat.NewDense(len(x), order, nil)
-	p.yMem = mat.NewDense(1, order, nil)
+
+	p.yMem = mat.NewDense(order, 1, nil)
 	p.eMem = mat.NewDense(1, order, nil)
 
 	return p, nil
@@ -83,8 +82,8 @@ func (af *FiltAP) Adapt(d float64, x []float64) {
 	af.dMem.Set(0, 0, d)
 
 	// estimate output and error
-	af.yMem.Mul(af.w, af.xMem)
-	af.eMem.Sub(af.dMem, af.yMem)
+	af.yMem.Mul(af.xMem.T(), af.w.T())
+	af.eMem.Sub(af.dMem, af.yMem.T())
 
 	// update
 	dw1 := mat.NewDense(af.order, af.order, nil)
@@ -112,10 +111,14 @@ func (af *FiltAP) Run(d []float64, x [][]float64) (y []float64, e []float64, wHi
 		return nil, nil, nil, errors.New("the length of slice d and x must agree")
 	}
 	af.n = len(x[0])
-	af.wHist = mat.NewDense(N, af.n, nil)
+	af.wHist = make([][]float64, N)
+	for i := 0; i < N; i++ {
+		af.wHist[i] = make([]float64, af.n)
+	}
 
 	y = make([]float64, N)
 	e = make([]float64, N)
+	w := af.w.RawRowView(0)
 
 	xr, _ := af.xMem.Dims()
 	xCol := make([]float64, xr)
@@ -124,8 +127,7 @@ func (af *FiltAP) Run(d []float64, x [][]float64) (y []float64, e []float64, wHi
 
 	//adaptation loop
 	for i := 0; i < N; i++ {
-		//af.wHist[i] = af.w
-		af.wHist.SetRow(i, af.w.RawRowView(0))
+		copy(af.wHist[i], w)
 
 		// create input matrix and target vector
 		// shift column
@@ -140,8 +142,8 @@ func (af *FiltAP) Run(d []float64, x [][]float64) (y []float64, e []float64, wHi
 
 		// estimate output and error
 		// same as af.yMem.Mul(af.xMem, af.w.T()).T()
-		af.yMem.Mul(af.w, af.xMem.T())
-		af.eMem.Sub(af.dMem, af.yMem)
+		af.yMem.Mul(af.xMem.T(), af.w.T())
+		af.eMem.Sub(af.dMem, af.yMem.T())
 		y[i] = af.yMem.At(0, 0)
 		e[i] = af.eMem.At(0, 0)
 
@@ -161,10 +163,6 @@ func (af *FiltAP) Run(d []float64, x [][]float64) (y []float64, e []float64, wHi
 		dw.Scale(af.mu, dw)
 		af.w.Add(af.w, dw.T())
 	}
-	wHist = make([][]float64, N)
-	for i := 0; i < N; i++ {
-		wHist[i] = make([]float64, af.n)
-		copy(wHist[i], af.wHist.RawRowView(i))
-	}
+	wHist = af.wHist
 	return y, e, wHist, nil
 }
