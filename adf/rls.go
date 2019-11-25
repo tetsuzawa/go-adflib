@@ -47,11 +47,33 @@ func NewFiltRLS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter, 
 //and update filter weights according to error `e`.
 func (af *FiltRLS) Adapt(d float64, x []float64) {
 	w := af.w.RawRowView(0)
+	R1 := mat.NewDense(af.n, af.n, nil)
+	var R2 float64
+	xVec := mat.NewDense(1, af.n, nil)
+	aux1 := mat.NewDense(af.n, 1, nil)
+	aux4 := mat.NewDense(1, af.n, nil)
+	var aux2 float64
+	aux3 := mat.NewDense(af.n, af.n, nil)
+	dwT := mat.NewDense(af.n, 1, nil)
+
 	y := floats.Dot(w, x)
 	e := d - y
-	for i := 0; i < len(x); i++ {
-		w[i] += af.mu * e * x[i]
-	}
+
+	xVec.SetRow(0, x)
+	aux1.Mul(af.rMat, xVec.T())
+	aux2 = floats.Dot(mat.Col(nil, 0, aux1), mat.Row(nil, 0, xVec))
+	R1 = mat.DenseCopyOf(af.rMat)
+	R1.Scale(aux2, R1)
+	aux4.Mul(xVec, af.rMat)
+
+	R2 = af.mu + mat.Dot(aux4.RowView(0), mat.DenseCopyOf(xVec.T()).ColView(0))
+	R1.Scale(1/R2, R1)
+	aux3.Sub(af.rMat, R1)
+	af.rMat.Scale(1/af.mu, aux3)
+	dwT.Mul(af.rMat, xVec.T())
+	dwT.Scale(e, dwT)
+
+	floats.Add(w, mat.Col(nil, 0, dwT))
 }
 
 //Run calculates the errors `e` between desired values `d` and estimated values `y` in a row,
