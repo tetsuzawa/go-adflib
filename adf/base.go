@@ -32,7 +32,7 @@ type AdaptiveFilter interface {
 	checkIntParam(p, low, high int, name string) (int, error)
 
 	//SetStepSize sets the step size of adaptive filter.
-	SetStepSize(mu float64)
+	SetStepSize(mu float64) error
 
 	//GetParams returns the parameters at the time this func is called.
 	//parameters contains `n`: filter length, `mu`: filter update step size and `w`: filter weights.
@@ -112,10 +112,12 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 //FiltBase is base struct for adaptive filter structs.
 //It puts together some functions used by all adaptive filters.
 type filtBase struct {
-	kind string
-	n    int
-	mu   float64
-	w    *mat.Dense
+	kind  string
+	n     int
+	muMin float64
+	muMax float64
+	mu    float64
+	w     *mat.Dense
 }
 
 //NewFiltBase is constructor of base adaptive filter only for development.
@@ -124,7 +126,9 @@ func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 	p := new(filtBase)
 	p.kind = "Base filter"
 	p.n = n
-	p.mu, err = p.checkFloatParam(mu, 0, 1000, "mu")
+	p.muMin = 0
+	p.muMax = 1000
+	p.mu, err = p.checkFloatParam(mu, p.muMin, p.muMax, "mu")
 	if err != nil {
 		return nil, err
 	}
@@ -229,8 +233,13 @@ func (af *filtBase) checkIntParam(p, low, high int, name string) (int, error) {
 }
 
 //SetStepSize set a update step size mu.
-func (af *filtBase) SetStepSize(mu float64) {
-	af.mu = mu
+func (af *filtBase) SetStepSize(mu float64) error {
+	var err error
+	af.mu, err = af.checkFloatParam(mu, af.muMin, af.muMax, "mu")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 //GetParams returns the parameters at the time this func is called.

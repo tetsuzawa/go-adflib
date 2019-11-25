@@ -21,7 +21,9 @@ func NewFiltNLMS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter,
 	p := new(FiltNLMS)
 	p.kind = "NLMS filter"
 	p.n = n
-	p.mu, err = p.checkFloatParam(mu, 0, 2, "mu")
+	p.muMin = 0
+	p.muMax = 2
+	p.mu, err = p.checkFloatParam(mu, p.muMin, p.muMax, "mu")
 	if err != nil {
 		return nil, err
 	}
