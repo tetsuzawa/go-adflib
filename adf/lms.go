@@ -65,7 +65,7 @@ func (af *FiltLMS) Run(d []float64, x [][]float64) (y []float64, e []float64, wH
 		y[i] = floats.Dot(w, x[i])
 		e[i] = d[i] - y[i]
 		for j := 0; j < af.n; j++ {
-			w[j] = af.mu * e[i] * x[i][j]
+			w[j] += af.mu * e[i] * x[i][j]
 		}
 	}
 	wHist = af.wHistory

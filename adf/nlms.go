@@ -72,7 +72,7 @@ func (af *FiltNLMS) Run(d []float64, x [][]float64) (y []float64, e []float64, w
 		e[i] = d[i] - y[i]
 		nu := af.mu / (af.eps + floats.Dot(x[i], x[i]))
 		for j := 0; j < af.n; j++ {
-			w[j] = nu * e[i] * x[i][j]
+			w[j] += nu * e[i] * x[i][j]
 		}
 	}
 	wHist = af.wHistory
