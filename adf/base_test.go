@@ -438,10 +438,12 @@ func TestAdaptiveFilter_Run(t *testing.T) {
 
 func TestAdaptiveFilter_GetParams(t *testing.T) {
 	type fields struct {
-		kind string
-		n    int
-		mu   float64
-		w    *mat.Dense
+		kind  string
+		n     int
+		muMin float64
+		muMax float64
+		mu    float64
+		w     *mat.Dense
 	}
 	tests := []struct {
 		name   string
@@ -453,10 +455,12 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 		{
 			name: "GetParams",
 			fields: fields{
-				kind: "Base Filter",
-				n:    8,
-				mu:   1.0,
-				w:    mat.NewDense(1, 8, make([]float64, 8)),
+				kind:  "Base Filter",
+				n:     8,
+				muMin: 0,
+				muMax: 2,
+				mu:    1.0,
+				w:     mat.NewDense(1, 8, make([]float64, 8)),
 			},
 			want:  8,
 			want1: 1.0,
@@ -465,7 +469,7 @@ func TestAdaptiveFilter_GetParams(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			af := filtBase{tt.fields.kind, tt.fields.n, tt.fields.mu, tt.fields.w}
+			af := filtBase{tt.fields.kind, tt.fields.n, tt.fields.muMin, tt.fields.muMax, tt.fields.mu, tt.fields.w}
 			got, got1, got2 := af.GetParams()
 			if got != tt.want {
 				t.Errorf("GetParams() got = %v, want %v", got, tt.want)

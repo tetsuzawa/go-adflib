@@ -27,7 +27,9 @@ func NewFiltAP(n int, mu float64, order int, eps float64, w interface{}) (Adapti
 	p := new(FiltAP)
 	p.kind = "AP filter"
 	p.n = n
-	p.mu, err = p.checkFloatParam(mu, 0, 1000, "mu")
+	p.muMin = 0
+	p.muMax = 1000
+	p.mu, err = p.checkFloatParam(mu, p.muMin, p.muMax, "mu")
 	if err != nil {
 		return nil, err
 	}

@@ -23,7 +23,9 @@ func NewFiltRLS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter, 
 	p := new(FiltRLS)
 	p.kind = "RLS filter"
 	p.n = n
-	p.mu, err = p.checkFloatParam(mu, 0, 1, "mu")
+	p.muMin = 0
+	p.muMax = 1
+	p.mu, err = p.checkFloatParam(mu, p.muMin, p.muMax, "mu")
 	if err != nil {
 		return nil, err
 	}
