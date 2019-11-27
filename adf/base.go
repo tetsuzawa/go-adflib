@@ -104,6 +104,8 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	for i := 0; i <= cpuNum; i++ {
 		i := i
 		af := af.clone()
+		d := d
+		x := x
 		//go func(i int) error {
 		eg.Go(func() error {
 			//defer wg.Done()
