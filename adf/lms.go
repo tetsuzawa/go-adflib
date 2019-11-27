@@ -73,3 +73,8 @@ func (af *FiltLMS) Run(d []float64, x [][]float64) (y []float64, e []float64, wH
 	wHist = af.wHistory
 	return y, e, wHist, nil
 }
+
+func (af *FiltLMS) clone() AdaptiveFilter {
+	altaf := *af
+	return &altaf
+}

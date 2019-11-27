@@ -168,3 +168,8 @@ func (af *FiltAP) Run(d []float64, x [][]float64) (y []float64, e []float64, wHi
 	wHist = af.wHist
 	return y, e, wHist, nil
 }
+
+func (af *FiltAP) clone() AdaptiveFilter {
+	altaf := *af
+	return &altaf
+}

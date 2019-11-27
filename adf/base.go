@@ -40,6 +40,8 @@ type AdaptiveFilter interface {
 
 	//GetParams returns the name of ADF.
 	GetKindName() (kind string)
+
+	clone() AdaptiveFilter
 }
 
 //Must checks whether err is nil or not. If err in not nil, this func causes panic.
@@ -251,4 +253,9 @@ func (af *filtBase) GetParams() (int, float64, []float64) {
 //GetParams returns the name of ADF.
 func (af *filtBase) GetKindName() string {
 	return af.kind
+}
+
+func (af *filtBase) clone() AdaptiveFilter {
+	altaf := *af
+	return &altaf
 }

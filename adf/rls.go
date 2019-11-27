@@ -130,3 +130,8 @@ func (af *FiltRLS) Run(d []float64, x [][]float64) (y []float64, e []float64, wH
 	wHist = af.wHist
 	return y, e, af.wHist, nil
 }
+
+func (af *FiltRLS) clone() AdaptiveFilter {
+	altaf := *af
+	return &altaf
+}
