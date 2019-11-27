@@ -109,8 +109,8 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 			if i == cpuNum {
 				divMax = remainder
 			}
+			af := af
 			for j := 0; j < divMax; j++ {
-				af := af
 				//init
 				err := af.initWeights("zeros", len(x[0]))
 				if err != nil {
