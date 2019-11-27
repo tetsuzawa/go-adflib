@@ -104,19 +104,7 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	//wg.Add(cpuNum)
 	for i := 0; i <= cpuNum; i++ {
 		i := i
-
-		var a interface{}
-		switch a = af.(type) {
-		default:
-			a := value
-		}
-
-		padmin := user1.(*Admin) // Obtain *Admin pointer
-		admin2 := *padmin        // Make a copy of the Admin struct
-		user2 = &admin2          // Wrap its address in another User
-		user2.SetName("user2")
-
-		af := af
+		af := af.clone()
 		//go func(i int) error {
 		eg.Go(func() error {
 			//defer wg.Done()
