@@ -100,7 +100,6 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	divMax := steps / cpuNum
 	remainder := steps % cpuNum
 
-
 	//wg.Add(cpuNum)
 	for i := 0; i <= cpuNum; i++ {
 		i := i
