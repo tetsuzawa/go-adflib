@@ -11,8 +11,10 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/tetsuzawa/go-adflib/misc"
+	"golang.org/x/sync/errgroup"
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
+	"runtime"
 )
 
 // AdaptiveFilter is the basic Adaptive Filter interface type.
@@ -88,25 +90,77 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	mus := misc.LinSpace(muStart, muEnd, steps)
 	es := make([]float64, len(mus))
 	zeros := make([]float64, int(float64(len(x))*nTrain))
-	for i, mu := range mus {
-		//init
-		err := af.initWeights("zeros", len(x[0]))
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "failed to init weights at InitWights()")
-		}
-		af.SetStepSize(mu)
-		//run
-		_, e, _, err := PreTrainedRun(af, d, x, nTrain, epochs)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "failed to pre train at PreTrainedRun()")
-		}
-		es[i], err = misc.GetMeanError(e, zeros, criteria)
-		//fmt.Println(es[i])
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "failed to get mean error at GetMeanError()")
-		}
+
+	//wg := new(sync.WaitGroup)
+	eg := new(errgroup.Group)
+	cpuNum := runtime.NumCPU()
+	divMax := steps / cpuNum
+	remainder := steps % cpuNum
+
+	//wg.Add(cpuNum)
+	for i := 0; i <= cpuNum; i++ {
+		i := i
+		//go func(i int) error {
+		eg.Go(func() error {
+			//defer wg.Done()
+			offset := i * divMax
+			divMax := divMax
+			if i == cpuNum {
+				divMax = remainder
+			}
+			for j := 0; j < divMax; j++ {
+				//init
+				err := af.initWeights("zeros", len(x[0]))
+				if err != nil {
+					return errors.Wrap(err, "failed to init weights at InitWights()")
+				}
+				err = af.SetStepSize(mus[offset+j])
+				if err != nil {
+					return errors.Wrap(err, "failed to set step size at SetStepSize()")
+				}
+				//run
+				_, e, _, err := PreTrainedRun(af, d, x, nTrain, epochs)
+				if err != nil {
+					return errors.Wrap(err, "failed to pre train at PreTrainedRun()")
+				}
+				es[offset+j], err = misc.GetMeanError(e, zeros, criteria)
+				//fmt.Println(es[i])
+				if err != nil {
+					return errors.Wrap(err, "failed to get mean error at GetMeanError()")
+				}
+
+			}
+			return nil
+		})
 	}
+
+	if err := eg.Wait(); err != nil {
+		return nil, nil, err
+	}
+
 	return es, mus, nil
+
+	/*
+		for i, mu := range mus {
+			//init
+			err := af.initWeights("zeros", len(x[0]))
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "failed to init weights at InitWights()")
+			}
+			af.SetStepSize(mu)
+			//run
+			_, e, _, err := PreTrainedRun(af, d, x, nTrain, epochs)
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "failed to pre train at PreTrainedRun()")
+			}
+			es[i], err = misc.GetMeanError(e, zeros, criteria)
+			//fmt.Println(es[i])
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "failed to get mean error at GetMeanError()")
+			}
+		}
+		return es, mus, nil
+	*/
 }
 
 //FiltBase is base struct for adaptive filter structs.
