@@ -82,7 +82,7 @@ func PreTrainedRun(af AdaptiveFilter, d []float64, x [][]float64, nTrain float64
 //`x` is input matrix.
 //`muStart` is starting learning rate.
 //`muEnd` is final learning rate.
-//`steps` : how many learning rates should be tested between `muStart` and `muEnd`.
+//`steps` is how many learning rates should be tested between `muStart` and `muEnd`.
 //`nTrain` is train to test ratio, typical value is 0.5. (that means 50% of data is used for training)
 //`epochs` is number of training epochs, typical value is 1. This number describes how many times the training will be repeated.
 //`criteria` is how should be measured the mean error. Available values are "MSE", "MAE" and "RMSE".
