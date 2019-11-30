@@ -14,39 +14,7 @@ func init() {
 	rand.Seed(1)
 }
 
-/*
-func TestFiltLMS_Adapt(t *testing.T) {
-	type fields struct {
-		filtBase filtBase
-		kind           string
-		wHist       [][]float64
-	}
-	type args struct {
-		d float64
-		x []float64
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			af := &FiltLMS{
-				filtBase: tt.fields.filtBase,
-				kind:           tt.fields.kind,
-				wHist:       tt.fields.wHist,
-			}
-		})
-	}
-}
-
-*/
-
 func TestFiltLMS_Run(t *testing.T) {
-	rand.Seed(1)
 	//creation of data
 	//number of samples
 	n := 64
@@ -65,24 +33,6 @@ func TestFiltLMS_Run(t *testing.T) {
 		v[i] = rand.NormFloat64() * 0.1
 		d[i] = x[i][0]
 	}
-	//n := 100
-	//x := NewNormRand2dSlice(n, 4)
-	//v := NewNormRandSlice(n)
-	//floats.Scale(2.0, x[0])
-	//floats.Scale(0.1, x[1])
-	//floats.Scale(1.0, x[2])
-	//floats.Scale(0.5, x[3])
-	//d := make([]float64, n)
-	//for i := 0; i < 4; i++ {
-	//	floats.Add(d, x[i])
-	//}
-	//floats.Add(d, v)
-
-	//type fields struct {
-	//	filtBase filtBase
-	//	kind           string
-	//	wHist       [][]float64
-	//}
 	type args struct {
 		d []float64
 		x [][]float64
@@ -98,9 +48,6 @@ func TestFiltLMS_Run(t *testing.T) {
 	}{
 		{
 			name: "Run LMS Filter",
-			//fields: fields{
-			//	Must(NewFiltLMS(4, 1., "random")),
-			//},
 			args: args{
 				d: d,
 				x: x,
@@ -113,12 +60,7 @@ func TestFiltLMS_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//af := &FiltLMS{
-			//	filtBase: tt.fields.filtBase,
-			//	kind:           tt.fields.kind,
-			//	wHist:       tt.fields.wHist,
-			//}
-			af := Must(NewFiltLMS(L, 0.525, "zeros"))
+			af := Must(NewFiltLMS(L, 0.525, nil))
 			y, e, wHist, err := af.Run(tt.args.d, tt.args.x)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
@@ -153,36 +95,6 @@ func TestFiltLMS_Run(t *testing.T) {
 	}
 }
 
-/*
-func TestNewFiltLMS(t *testing.T) {
-	type args struct {
-		n  int
-		mu float64
-		w  interface{}
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    *FiltLMS
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewFiltLMS(tt.args.n, tt.args.mu, tt.args.w)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewFiltLMS() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewFiltLMS() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-*/
-
 func ExampleExploreLearning_lms() {
 	rand.Seed(1)
 	//creation of data
@@ -205,7 +117,7 @@ func ExampleExploreLearning_lms() {
 		d[i] = x[i][0]
 	}
 
-	af, err := NewFiltLMS(L, mu, "zeros")
+	af, err := NewFiltLMS(L, mu, nil)
 	check(err)
 	es, mus, err := ExploreLearning(af, d, x, 0.00001, 2.0, 100, 0.5, 100, "MSE", nil)
 	check(err)
