@@ -143,35 +143,21 @@ func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 
 //initWeights initialises the adaptive weights of the filter.
 //The arg `w` is initial weights of filter.
-// Possible value "random":  create random weights with stddev 0.5 and mean is 0.
+//Typical value is zeros of length `n`
 // "zeros": create zero value weights.
 //`n` is size of filter. Note that it is often mistaken for the sample length.
-func (af *filtBase) initWeights(w interface{}, n int) error {
+func (af *filtBase) initWeights(w []float64, n int) error {
 	if n <= 0 {
 		n = af.n
 	}
-	switch v := w.(type) {
-	case string:
-		if v == "random" {
-			w := make([]float64, n)
-			for i := 0; i < n; i++ {
-				w[i] = misc.NewRandn(0.5, 0)
-			}
-			af.w = mat.NewDense(1, n, w)
-		} else if v == "zeros" {
-			w := make([]float64, n)
-			af.w = mat.NewDense(1, n, w)
-		} else {
-			return errors.New("impossible to understand the w")
-		}
-	case []float64:
-		if len(v) != n {
-			return errors.New("length of w is different from n")
-		}
-		af.w = mat.NewDense(1, n, v)
-	default:
-		return errors.New(`args w must be "random" or "zeros" or []float64{...}`)
+	if w == nil {
+		w = make([]float64, n)
 	}
+	if len(w) != n{
+		return fmt.Errorf("parameter %v is not in range <%v, %v>", name, low, high)
+	}
+	af.w = mat.NewDense(1, n, w)
+
 	return nil
 }
 
