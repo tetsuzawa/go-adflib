@@ -93,6 +93,7 @@ func TestFiltNLMS_Run(t *testing.T) {
 }
 
 func ExampleExploreLearning_nlms() {
+	rand.Seed(1)
 	//creation of data
 	//number of samples
 	//n := 64
@@ -127,5 +128,5 @@ func ExampleExploreLearning_nlms() {
 	eMin := floats.Min(es)
 	fmt.Printf("the step size mu with the smallest error is %.3f\n", res[eMin])
 	//output:
-	//the step size mu with the smallest error is 1.657
+	//the step size mu with the smallest error is 1.535
 }

@@ -10,11 +10,8 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
-func init() {
-	rand.Seed(1)
-}
-
 func TestFiltLMS_Run(t *testing.T) {
+	rand.Seed(1)
 	//creation of data
 	//number of samples
 	n := 64
@@ -60,7 +57,7 @@ func TestFiltLMS_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			af := Must(NewFiltLMS(L, 0.525, nil))
+			af := Must(NewFiltLMS(L, 0.525, make([]float64, L)))
 			y, e, wHist, err := af.Run(tt.args.d, tt.args.x)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
@@ -96,6 +93,7 @@ func TestFiltLMS_Run(t *testing.T) {
 }
 
 func ExampleExploreLearning_lms() {
+	rand.Seed(1)
 	//creation of data
 	//number of samples
 	n := 64
