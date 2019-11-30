@@ -18,7 +18,7 @@ type FiltRLS struct {
 
 //NewFiltRLS is constructor of RLS filter.
 //This func initialize filter length `n`, update step size `mu`, small enough value `eps`, and filter weight `w`.
-func NewFiltRLS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter, error) {
+func NewFiltRLS(n int, mu float64, eps float64, w []float64) (AdaptiveFilter, error) {
 	var err error
 	p := new(FiltRLS)
 	p.kind = "RLS filter"
