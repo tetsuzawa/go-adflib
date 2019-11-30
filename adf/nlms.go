@@ -16,7 +16,7 @@ type FiltNLMS struct {
 
 //NewFiltLMS is constructor of LMS filter.
 //This func initialize filter length `n`, update step size `mu` and filter weight `w`.
-func NewFiltNLMS(n int, mu float64, eps float64, w interface{}) (AdaptiveFilter, error) {
+func NewFiltNLMS(n int, mu float64, eps float64, w []float64) (AdaptiveFilter, error) {
 	var err error
 	p := new(FiltNLMS)
 	p.kind = "NLMS filter"
@@ -79,4 +79,9 @@ func (af *FiltNLMS) Run(d []float64, x [][]float64) (y []float64, e []float64, w
 	}
 	wHist = af.wHistory
 	return y, e, af.wHistory, nil
+}
+
+func (af *FiltNLMS) clone() AdaptiveFilter {
+	altaf := *af
+	return &altaf
 }

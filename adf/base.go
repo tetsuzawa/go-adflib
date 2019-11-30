@@ -17,7 +17,7 @@ import (
 
 // AdaptiveFilter is the basic Adaptive Filter interface type.
 type AdaptiveFilter interface {
-	initWeights(w interface{}, n int) error
+	initWeights(w []float64, n int) error
 	//Predict calculates the new estimated value `y` from input slice `x`.
 	Predict(x []float64) (y float64)
 
@@ -40,6 +40,8 @@ type AdaptiveFilter interface {
 
 	//GetParams returns the name of ADF.
 	GetKindName() (kind string)
+
+	clone() AdaptiveFilter
 }
 
 //Must checks whether err is nil or not. If err in not nil, this func causes panic.
@@ -90,11 +92,14 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	zeros := make([]float64, int(float64(len(x))*nTrain))
 	for i, mu := range mus {
 		//init
-		err := af.initWeights("zeros", len(x[0]))
+		err := af.initWeights(nil, len(x[0]))
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to init weights at InitWights()")
 		}
-		af.SetStepSize(mu)
+		err = af.SetStepSize(mu)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "failed to set step size at StetStepSize()")
+		}
 		//run
 		_, e, _, err := PreTrainedRun(af, d, x, nTrain, epochs)
 		if err != nil {
@@ -121,7 +126,7 @@ type filtBase struct {
 }
 
 //NewFiltBase is constructor of base adaptive filter only for development.
-func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
+func newFiltBase(n int, mu float64, w []float64) (AdaptiveFilter, error) {
 	var err error
 	p := new(filtBase)
 	p.kind = "Base filter"
@@ -141,35 +146,21 @@ func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 
 //initWeights initialises the adaptive weights of the filter.
 //The arg `w` is initial weights of filter.
-// Possible value "random":  create random weights with stddev 0.5 and mean is 0.
-// "zeros": create zero value weights.
+//Typical value is zeros with length `n`.
+//If `w` is nil, this func initializes `w` as zeros.
 //`n` is size of filter. Note that it is often mistaken for the sample length.
-func (af *filtBase) initWeights(w interface{}, n int) error {
+func (af *filtBase) initWeights(w []float64, n int) error {
 	if n <= 0 {
 		n = af.n
 	}
-	switch v := w.(type) {
-	case string:
-		if v == "random" {
-			w := make([]float64, n)
-			for i := 0; i < n; i++ {
-				w[i] = misc.NewRandn(0.5, 0)
-			}
-			af.w = mat.NewDense(1, n, w)
-		} else if v == "zeros" {
-			w := make([]float64, n)
-			af.w = mat.NewDense(1, n, w)
-		} else {
-			return errors.New("impossible to understand the w")
-		}
-	case []float64:
-		if len(v) != n {
-			return errors.New("length of w is different from n")
-		}
-		af.w = mat.NewDense(1, n, v)
-	default:
-		return errors.New(`args w must be "random" or "zeros" or []float64{...}`)
+	if w == nil {
+		w = make([]float64, n)
 	}
+	if len(w) != n {
+		return fmt.Errorf("the length of slice `w` and `n` must agree. len(w): %d, n: %d", len(w), n)
+	}
+	af.w = mat.NewDense(1, n, w)
+
 	return nil
 }
 
@@ -251,4 +242,9 @@ func (af *filtBase) GetParams() (int, float64, []float64) {
 //GetParams returns the name of ADF.
 func (af *filtBase) GetKindName() string {
 	return af.kind
+}
+
+func (af *filtBase) clone() AdaptiveFilter {
+	altaf := *af
+	return &altaf
 }

@@ -22,7 +22,7 @@ type FiltAP struct {
 
 //NewFiltAP is constructor of AP filter.
 //This func initialize filter length `n`, update step size `mu`, projection order `order` and filter weight `w`.
-func NewFiltAP(n int, mu float64, order int, eps float64, w interface{}) (AdaptiveFilter, error) {
+func NewFiltAP(n int, mu float64, order int, eps float64, w []float64)(AdaptiveFilter, error) {
 	var err error
 	p := new(FiltAP)
 	p.kind = "AP filter"
@@ -167,4 +167,9 @@ func (af *FiltAP) Run(d []float64, x [][]float64) (y []float64, e []float64, wHi
 	}
 	wHist = af.wHist
 	return y, e, wHist, nil
+}
+
+func (af *FiltAP) clone() AdaptiveFilter {
+	altaf := *af
+	return &altaf
 }
