@@ -7,3 +7,9 @@ func float64sToComplex128s(fs []float64) []complex128 {
 	}
 	return cs
 }
+
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
