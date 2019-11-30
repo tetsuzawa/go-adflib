@@ -182,7 +182,6 @@ func TestMust(t *testing.T) {
 }
 
 func TestExploreLearning(t *testing.T) {
-	rand.Seed(1)
 	//creation of data
 	//number of samples
 	n := 64
@@ -208,7 +207,7 @@ func TestExploreLearning(t *testing.T) {
 	type fields struct {
 		n  int
 		mu float64
-		w  interface{}
+		w  []float64
 	}
 	type args struct {
 		d        []float64
@@ -230,11 +229,11 @@ func TestExploreLearning(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "random",
+			name: "zeros",
 			fields: fields{
 				n:  L,
 				mu: 1.0,
-				w:  "random",
+				w:  nil,
 			},
 			args: args{
 				d:        d,
@@ -279,14 +278,17 @@ func TestExploreLearning(t *testing.T) {
 	}
 }
 
-func TestAdaptiveFilter_InitWeights(t *testing.T) {
+func Test_filtBase_initWeights(t *testing.T) {
 	type fields struct {
-		w  *mat.Dense
-		n  int
-		mu float64
+		kind  string
+		n     int
+		muMin float64
+		muMax float64
+		mu    float64
+		w     *mat.Dense
 	}
 	type args struct {
-		w interface{}
+		w []float64
 		n int
 	}
 	tests := []struct {
@@ -295,14 +297,48 @@ func TestAdaptiveFilter_InitWeights(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "zeros success",
+			fields: fields{
+				kind:  "Base filter",
+				n:     8,
+				muMin: 0,
+				muMax: 1000,
+				mu:    1.0,
+				w:     mat.NewDense(1, 8, []float64{0, 0, 0, 0, 0, 0, 0, 0}),
+			},
+			args: args{
+				n: 8,
+				w: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "zeros failed",
+			fields: fields{
+				kind:  "Base filter",
+				n:     8,
+				muMin: 0,
+				muMax: 1000,
+				mu:    1.0,
+				w:     nil,
+			},
+			args: args{
+				n: 4,
+				w: []float64{0, 0, 0, 0, 0, 0, 0, 0,},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			af := &filtBase{
-				w:  tt.fields.w,
-				n:  tt.fields.n,
-				mu: tt.fields.mu,
+				kind:  tt.fields.kind,
+				n:     tt.fields.n,
+				muMin: tt.fields.muMin,
+				muMax: tt.fields.muMax,
+				mu:    tt.fields.mu,
+				w:     tt.fields.w,
 			}
 			if err := af.initWeights(tt.args.w, tt.args.n); (err != nil) != tt.wantErr {
 				t.Errorf("initWeights() error = %v, wantErr %v", err, tt.wantErr)
@@ -488,7 +524,7 @@ func Test_filtBase_GetKindName(t *testing.T) {
 	type fields struct {
 		n  int
 		mu float64
-		w  interface{}
+		w  []float64
 	}
 	tests := []struct {
 		name   string
@@ -500,7 +536,7 @@ func Test_filtBase_GetKindName(t *testing.T) {
 			fields: fields{
 				n:  8,
 				mu: 1.0,
-				w:  "zeros",
+				w:  nil,
 			},
 			want: "Base filter",
 		},
