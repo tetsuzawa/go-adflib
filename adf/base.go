@@ -1,10 +1,3 @@
-/*
-This package is designed to simplify adaptive signal processing tasks
-with golang (filtering, prediction, reconstruction, classification).
-For code optimisation, this library uses gonum/floats and gonum/mat for slice operations.
-
-This package is created with reference to https://github.com/matousc89/padasip.
-*/
 package adf
 
 import (
@@ -75,15 +68,25 @@ func PreTrainedRun(af AdaptiveFilter, d []float64, x [][]float64, nTrain float64
 }
 
 //ExploreLearning searches the `mu` with the smallest error value from the input matrix `x` and desired values `d`.
+//
 //The arg `d` is desired value.
+//
 //`x` is input matrix.
+//
 //`muStart` is starting learning rate.
+//
 //`muEnd` is final learning rate.
+//
 //`steps` : how many learning rates should be tested between `muStart` and `muEnd`.
+//
 //`nTrain` is train to test ratio, typical value is 0.5. (that means 50% of data is used for training)
+//
 //`epochs` is number of training epochs, typical value is 1. This number describes how many times the training will be repeated.
+//
 //`criteria` is how should be measured the mean error. Available values are "MSE", "MAE" and "RMSE".
+//
 //`target_w` is target weights. If the slice is nil, the mean error is estimated from prediction error.
+//
 // If an slice is provided, the error between weights and `target_w` is used.
 func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muEnd float64, steps int,
 	nTrain float64, epochs int, criteria string, targetW []float64) ([]float64, []float64, error) {
