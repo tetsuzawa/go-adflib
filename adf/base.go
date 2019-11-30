@@ -17,7 +17,7 @@ import (
 
 // AdaptiveFilter is the basic Adaptive Filter interface type.
 type AdaptiveFilter interface {
-	initWeights(w interface{}, n int) error
+	initWeights(w []float64, n int) error
 	//Predict calculates the new estimated value `y` from input slice `x`.
 	Predict(x []float64) (y float64)
 
@@ -92,7 +92,7 @@ func ExploreLearning(af AdaptiveFilter, d []float64, x [][]float64, muStart, muE
 	zeros := make([]float64, int(float64(len(x))*nTrain))
 	for i, mu := range mus {
 		//init
-		err := af.initWeights("zeros", len(x[0]))
+		err := af.initWeights(nil, len(x[0]))
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to init weights at InitWights()")
 		}
@@ -123,7 +123,7 @@ type filtBase struct {
 }
 
 //NewFiltBase is constructor of base adaptive filter only for development.
-func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
+func newFiltBase(n int, mu float64, w []float64) (AdaptiveFilter, error) {
 	var err error
 	p := new(filtBase)
 	p.kind = "Base filter"
@@ -143,8 +143,8 @@ func newFiltBase(n int, mu float64, w interface{}) (AdaptiveFilter, error) {
 
 //initWeights initialises the adaptive weights of the filter.
 //The arg `w` is initial weights of filter.
-//Typical value is zeros of length `n`
-// "zeros": create zero value weights.
+//Typical value is zeros with length `n`.
+//If `w` is nil, this func initializes `w` as zeros.
 //`n` is size of filter. Note that it is often mistaken for the sample length.
 func (af *filtBase) initWeights(w []float64, n int) error {
 	if n <= 0 {
@@ -153,8 +153,8 @@ func (af *filtBase) initWeights(w []float64, n int) error {
 	if w == nil {
 		w = make([]float64, n)
 	}
-	if len(w) != n{
-		return fmt.Errorf("parameter %v is not in range <%v, %v>", name, low, high)
+	if len(w) != n {
+		return fmt.Errorf("the length of slice `w` and `n` must agree. len(w): %d, n: %d", len(w), n)
 	}
 	af.w = mat.NewDense(1, n, w)
 
