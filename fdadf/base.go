@@ -1,10 +1,3 @@
-/*
-This package is designed to simplify adaptive signal processing tasks
-within golang (filtering, prediction, reconstruction, classification).
-For code optimisation, this library uses gonum/floats for array operations.
-
-This package is created with reference to https://github.com/matousc89/padasip.
-*/
 package fdadf
 
 import (
