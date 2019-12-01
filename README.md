@@ -1,5 +1,5 @@
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-![](https://github.com/tetsuzawa/go-adflib/workflows/.github/workflows/go.yml/badge.svg)
+![](https://github.com/tetsuzawa/go-adflib/workflows/.github/workflows/Test/badge.svg)
 [![GoDoc](https://godoc.org/github.com/tetsuzawa/go-adflib?status.svg)](https://godoc.org/github.com/tetsuzawa/go-adflib)
 
 # go-adflib
