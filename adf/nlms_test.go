@@ -100,9 +100,9 @@ func ExampleFiltNLMS_Run() {
 	//filter coefficients
 	const (
 		//number of samples
-		n  = 256
+		n = 256
 		//length of filter
-		L  = 8
+		L = 8
 		//step size
 		mu = 1.0
 		//small value (epsilon)
@@ -176,4 +176,38 @@ func ExampleExploreLearning_nlms() {
 	fmt.Printf("the step size mu with the smallest error is %.3f\n", res[eMin])
 	//output:
 	//the step size mu with the smallest error is 1.535
+}
+
+func BenchmarkFiltNLMS_Adapt(b *testing.B) {
+	rand.Seed(1)
+	const (
+		L   = 8
+		mu  = 1.0
+		eps = 1e-5
+	)
+	af, err := NewFiltNLMS(L, mu, eps, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	n := b.N
+	var x = make([][]float64, n)
+	for i := 0; i < n; i++ {
+		x[i] = make([]float64, L)
+	}
+	//noise
+	//desired value
+	var d = make([]float64, n)
+	var xRow = make([]float64, L)
+	for i := 0; i < n; i++ {
+		xRow = misc.Unset(xRow, 0)
+		xRow = append(xRow, rand.NormFloat64())
+		copy(x[i], xRow)
+		d[i] = x[i][L-1]
+	}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		af.Adapt(d[i], x[i])
+		af.Predict(x[i])
+	}
+	b.StopTimer()
 }
