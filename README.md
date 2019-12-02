@@ -9,12 +9,14 @@ go-adflib was created to implement adaptive signal processing task with golang. 
 
 This library is created with reference to [padasip](https://github.com/matousc89/padasip) (writen in python).
 
-
 ## Demo
+By using an adaptive filter, you can predict the value of the next sample.
+
+![demo](https://raw.github.com/wiki/tetsuzawa/go-adflib/img/run_example.gif)
 
 ## Usage
 
-See also [godoc](https://godoc.org/github.com/tetsuzawa/go-adflib)
+See [godoc](https://godoc.org/github.com/tetsuzawa/go-adflib)
 
 ## Install
 
@@ -22,12 +24,5 @@ See also [godoc](https://godoc.org/github.com/tetsuzawa/go-adflib)
 go get github.com/tetsuzawa/go-adflib/adf
 ```
 
-## Contribution
-
-## Licence
-
-[MIT](https://github.com/tetsuzawa/go-adflib/blob/master/LICENSE)
-
 ## Author
-
-[tetsuzawa](https://github.com/tetsuzwa)
+See here [github](https://github.com/tetsuzawa)
