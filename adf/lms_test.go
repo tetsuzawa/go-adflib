@@ -2,6 +2,8 @@ package adf
 
 import (
 	"fmt"
+	"log"
+	"math"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -90,6 +92,49 @@ func TestFiltLMS_Run(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ExampleFiltLMS_Run() {
+	rand.Seed(1)
+
+	//filter coefficients
+	const (
+		//number of samples
+		n = 256
+		//length of filter
+		L = 8
+		//step size
+		mu = 0.1
+	)
+	//input value
+	var x = make([][]float64, n)
+	for i := 0; i < n; i++ {
+		x[i] = make([]float64, L)
+	}
+	//desired value
+	var d = make([]float64, n)
+
+	//create data
+	var xRow = make([]float64, L)
+	for i := 0; i < n; i++ {
+		xRow = misc.Unset(xRow, 0)
+		xRow = append(xRow, 0.2*rand.NormFloat64()+math.Sin(2*math.Pi*1200*float64(i)/48000))
+		copy(x[i], xRow)
+		//input value + noise
+		d[i] = x[i][0] * rand.NormFloat64() * 0.1
+	}
+
+	//make filter instance
+	af := Must(NewFiltLMS(L, mu, nil))
+
+	y, e, w, err := af.Run(d, x)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	//print result of filtering (only the last value)
+	fmt.Println(y[n-1], e[n-1], w[n-1])
+	//output:
+	//0.06387088068610643 -0.10319508751074963 [-0.003741875985062278 0.013838419910813545 0.009131739612541507 0.030741434038597575 0.015705215300138888 0.009312489706017198 -0.004147832537867598 -0.010268775367154906]
 }
 
 func ExampleExploreLearning_lms() {
