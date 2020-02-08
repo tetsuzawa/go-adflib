@@ -3,7 +3,7 @@ go-adflib
 
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![test](https://github.com/tetsuzawa/go-adflib/workflows/test/badge.svg)
-[![GoDoc](https://godoc.org/github.com/tetsuzawa/go-adflib?status.svg)](https://godoc.org/github.com/tetsuzawa/go-adflib)
+[![GoDoc](https://godoc.org/github.com/tetsuzawa/go-adflib?status.svg)](https://pkg.go.dev/github.com/tetsuzawa/go-adflib)
 
 go-adflib was created to implement adaptive signal processing task with golang. This library uses gonum/floats and gonum/mat for matrix operations. 
 
